@@ -19,7 +19,23 @@ EAT_WHAT_ROOT = Path("/home/yli/e/Dropbox/github/eat_what")
 
 def render_tool_page() -> str:
     tool = get_command_tool("eat-what")
-    return render_tool_page_shell(tool.id, tool.name, tool.description)
+    return render_tool_page_shell(
+        tool.id,
+        tool.name,
+        tool.description,
+        body_html="""<form class="tool-panel tool-panel--eat-what" data-tool-form>
+      <div class="tool-fields tool-fields--eat-what" data-tool-fields></div>
+      <div class="tool-submit-row">
+        <button class="open tool-submit tool-submit--eat-what" type="submit" data-tool-submit>生成</button>
+      </div>
+    </form>
+
+    <section class="notice" data-tool-status hidden></section>
+    <section class="notice" data-tool-error hidden></section>
+    <section class="tool-daka" data-tool-daka hidden></section>
+    <section class="generated-files" data-tool-files hidden></section>
+    <pre class="tool-output" data-tool-output></pre>""",
+    )
 
 
 def main() -> None:

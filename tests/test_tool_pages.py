@@ -16,6 +16,14 @@ class ToolPageTest(unittest.TestCase):
             self.assertIn("<script src=\"/static/tool.js\" defer></script>", html)
             self.assertIn("<a class=\"back\" href=\"/\">返回命令台</a>", html)
 
+    def test_eat_what_uses_single_row_submit_layout(self):
+        html = eat_what.render_tool_page()
+
+        self.assertIn('tool-panel--eat-what', html)
+        self.assertIn('tool-fields--eat-what', html)
+        self.assertIn('tool-submit-row', html)
+        self.assertIn('tool-submit--eat-what', html)
+
     def test_chinese_practice_uses_custom_field_layout(self):
         html = chinese_practice.render_tool_page()
 

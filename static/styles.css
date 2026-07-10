@@ -239,10 +239,27 @@ select {
   margin-bottom: 12px;
 }
 
+.tool-panel--eat-what {
+  display: block;
+}
+
 .tool-fields {
   display: grid;
   grid-template-columns: repeat(4, minmax(130px, 1fr));
   gap: 10px;
+}
+
+.tool-fields--eat-what {
+  margin-bottom: 12px;
+}
+
+.tool-submit-row {
+  display: block;
+}
+
+.tool-submit--eat-what {
+  display: block;
+  width: 100%;
 }
 
 .tool-field {
