@@ -382,8 +382,13 @@ function renderDakaTool(payload) {
     items.className = "daka-items";
 
     for (const item of resolution.items) {
-      const row = document.createElement("div");
-      row.className = `daka-item${item.checked ? " is-checked" : ""}`;
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = `daka-item daka-item-row${item.checked ? " is-checked" : ""}`;
+      row.setAttribute("aria-label", item.checked ? `${item.name}，今天已打卡` : `${item.name}，点击打卡`);
+      if (item.checked) {
+        row.setAttribute("aria-disabled", "true");
+      }
 
       const label = document.createElement("div");
       label.className = "daka-item-label";
@@ -395,19 +400,19 @@ function renderDakaTool(payload) {
 
       const meta = document.createElement("div");
       meta.className = "daka-item-meta";
-      meta.textContent = item.checked ? "今天已打卡" : `累计 ${item.checkin_count} 次`;
+      meta.textContent = `累计 ${item.checkin_count} 次`;
       label.append(meta);
 
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "daka-item-button";
-      button.textContent = item.checked ? "已打卡" : "打卡";
-      button.disabled = item.checked;
-      button.addEventListener("click", () => {
+      const badge = document.createElement("span");
+      badge.className = "daka-item-badge";
+      badge.textContent = item.checked ? "已打卡" : "打卡";
+
+      row.addEventListener("click", () => {
+        if (item.checked) return;
         handleDakaCheckin(resolution.name, item.name).catch((error) => showError(error.message));
       });
 
-      row.append(label, button);
+      row.append(label, badge);
       items.append(row);
     }
 

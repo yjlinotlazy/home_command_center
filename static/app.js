@@ -52,7 +52,7 @@ function renderApp(app) {
     : `<div class="fallback" aria-hidden="true">${escapeHtml(initials(app.name))}</div>`;
   const actionLabel = app.kind === "command" ? "使用" : "打开";
 
-  return `<article class="card" data-card>
+  return `<a class="card" data-card href="${escapeHtml(app.url)}" target="_blank" rel="noopener noreferrer">
     ${media}
     <div class="body">
       <div class="card-head">
@@ -64,9 +64,9 @@ function renderApp(app) {
       </div>
       <div class="description">${escapeHtml(app.description || "没有描述。")}</div>
       ${renderTags(app.tags)}
-      <a class="open" href="${escapeHtml(app.url)}" target="_blank" rel="noopener noreferrer">${actionLabel}</a>
+      <span class="open card-action">${actionLabel}</span>
     </div>
-  </article>`;
+  </a>`;
 }
 
 function filteredApps() {
