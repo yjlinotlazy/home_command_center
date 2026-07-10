@@ -7,15 +7,13 @@ import argparse
 import html
 import json
 import mimetypes
-import ssl
+import socket
 import time
 from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, unquote, urlparse
-from urllib.request import Request, urlopen
-
 import yaml
 
 from command_tools import ToolError, get_command_tool, list_command_tools, run_command_tool
@@ -168,12 +166,14 @@ class AppRegistry:
             return cached[1]
 
         try:
-            request = Request(app.health_url, headers={"User-Agent": "home-command-center/0.1"})
-            context = None
-            if app.health_url.startswith("https://") and not app.health_verify_tls:
-                context = ssl._create_unverified_context()
-            with urlopen(request, timeout=HEALTH_TIMEOUT_SECONDS, context=context) as response:
-                status = "online" if 200 <= response.status < 500 else "offline"
+            parsed = urlparse(app.health_url)
+            host = parsed.hostname
+            port = parsed.port
+            if not host or port is None:
+                status = "offline"
+            else:
+                with socket.create_connection((host, port), timeout=HEALTH_TIMEOUT_SECONDS):
+                    status = "online"
         except Exception:
             status = "offline"
 
