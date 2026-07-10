@@ -54,7 +54,7 @@ def render_tool_page() -> str:
     <section class="notice" data-tool-status hidden></section>
     <section class="notice" data-tool-error hidden></section>
     <section class="tool-daka" data-tool-daka hidden></section>
-    <section class="generated-files" data-tool-files></section>
+    <section class="generated-files" data-tool-files hidden></section>
     <pre class="tool-output" data-tool-output></pre>"""
         ),
         extra_stylesheets=("/static/chinese_practice.css",),

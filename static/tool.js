@@ -277,6 +277,7 @@ mobileOutputQuery.addEventListener("change", () => {
 
 function renderFiles(generatedFiles) {
   files.replaceChildren();
+  files.hidden = generatedFiles.length === 0;
   if (!generatedFiles.length) return;
 
   for (const file of generatedFiles) {

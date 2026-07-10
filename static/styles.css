@@ -16,6 +16,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -220,6 +224,7 @@ select {
 .tool-shell {
   width: min(1360px, calc(100% - 24px));
   max-width: none;
+  font-size: calc(1rem + 4px);
 }
 
 .tool-panel {
@@ -248,7 +253,7 @@ select {
 
 .tool-field span {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: calc(0.8rem + 4px);
 }
 
 textarea {
@@ -265,13 +270,14 @@ textarea {
 
 small {
   color: var(--muted);
-  font-size: 0.74rem;
+  font-size: calc(0.74rem + 4px);
   line-height: 1.25;
 }
 
 .tool-submit {
   border: 0;
   cursor: pointer;
+  font-size: calc(1rem + 5px);
 }
 
 .tool-submit:disabled {
@@ -289,7 +295,9 @@ small {
   padding: 18px;
   overflow: auto;
   white-space: pre-wrap;
-  font: 1.08rem/1.5 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: calc(1.08rem + 4px);
+  line-height: 1.5;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 }
 
 .ansi-red {
@@ -327,6 +335,7 @@ small {
   padding: 10px 12px;
   text-decoration: none;
   font-weight: 700;
+  font-size: calc(1rem + 4px);
 }
 
 .tool-output.failed {
@@ -401,7 +410,7 @@ small {
 
 .daka-report-title {
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: calc(0.95rem + 4px);
   font-weight: 700;
 }
 
@@ -435,7 +444,7 @@ small {
 .daka-report-sub {
   margin-top: 4px;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: calc(0.82rem + 4px);
 }
 
 .daka-report-badges {
@@ -450,7 +459,7 @@ small {
   border-radius: 999px;
   padding: 4px 8px;
   color: var(--report-accent);
-  font-size: 0.78rem;
+  font-size: calc(0.78rem + 4px);
   white-space: nowrap;
 }
 
@@ -465,7 +474,7 @@ small {
   gap: 12px;
   align-items: baseline;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: calc(0.84rem + 4px);
 }
 
 .daka-progress {
@@ -508,13 +517,13 @@ small {
 
 .daka-resolution-head h2 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: calc(1.05rem + 4px);
   line-height: 1.2;
 }
 
 .daka-resolution-count {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: calc(0.9rem + 4px);
   white-space: nowrap;
 }
 
@@ -555,7 +564,7 @@ small {
 
 .daka-item-meta {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: calc(0.84rem + 4px);
 }
 
 .daka-item-button {

@@ -21,7 +21,7 @@
   display: block;
   width: 100%;
   min-height: 52px;
-  font-size: 1.05rem;
+  font-size: calc(1rem + 5px);
 }
 
 @media (max-width: 720px) {
