@@ -1,0 +1,9 @@
+id: inspire
+name: Inspire
+url: "https://192.168.4.35:8000"
+description: Inspiration browser for writing and local notes.
+tags:
+  - writing
+  - local
+health_url: "https://192.168.4.35:8000/"
+health_verify_tls: false

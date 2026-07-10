@@ -1,0 +1,7 @@
+id: files
+name: Files
+url: "https://192.168.4.35:8002"
+description: Household file browser.
+tags:
+  - storage
+  - local
