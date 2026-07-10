@@ -7,8 +7,19 @@ import io
 import sys
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from command_tools import get_command_tool
+from cli_tools.util import render_tool_page_shell
 
 EAT_WHAT_ROOT = Path("/home/yli/e/Dropbox/github/eat_what")
+
+
+def render_tool_page() -> str:
+    tool = get_command_tool("eat-what")
+    return render_tool_page_shell(tool.id, tool.name, tool.description)
 
 
 def main() -> None:

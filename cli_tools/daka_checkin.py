@@ -10,6 +10,13 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from daka_bridge import DakaToolError, record_checkin
+from command_tools import get_command_tool
+from cli_tools.util import render_tool_page_shell
+
+
+def render_tool_page() -> str:
+    tool = get_command_tool("daka")
+    return render_tool_page_shell(tool.id, tool.name, tool.description)
 
 
 def main() -> None:

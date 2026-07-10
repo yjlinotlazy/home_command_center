@@ -21,6 +21,7 @@ import yaml
 from command_tools import ToolError, get_command_tool, list_command_tools, run_command_tool
 from app_settings import chinese_chars_output_dir
 from daka_bridge import DakaToolError, generate_report, load_state
+from cli_tools import chinese_practice, daka_checkin, eat_what
 
 
 ROOT = Path(__file__).resolve().parent
@@ -198,6 +199,11 @@ class AppRegistry:
 
 
 REGISTRY = AppRegistry(DEFAULT_APPS_DIR)
+TOOL_PAGE_RENDERERS = {
+    "chinese-practice": chinese_practice.render_tool_page,
+    "daka": daka_checkin.render_tool_page,
+    "eat-what": eat_what.render_tool_page,
+}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -218,7 +224,11 @@ class Handler(BaseHTTPRequestHandler):
             except ToolError as exc:
                 self._send_error(404, str(exc))
                 return
-            self._send_html(render_tool_page(tool.id, tool.name))
+            renderer = TOOL_PAGE_RENDERERS.get(tool.id)
+            if renderer is None:
+                self._send_error(500, f"No page renderer for tool {tool.id}")
+                return
+            self._send_html(renderer())
             return
 
         if path == "/api/apps":
@@ -408,46 +418,6 @@ def render_dashboard() -> str:
 </body>
 </html>
 """
-
-
-def render_tool_page(tool_id: str, tool_name: str) -> str:
-    title = f"{tool_name} - 家用命令台"
-    return f"""<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{html.escape(title)}</title>
-  <link rel="stylesheet" href="/static/styles.css">
-  <script>window.__COMMAND_TOOL_ID__ = {json.dumps(tool_id)};</script>
-  <script src="/static/tool.js" defer></script>
-</head>
-<body>
-  <main class="shell tool-shell">
-    <header class="topbar">
-      <div>
-        <h1 data-tool-title>{html.escape(tool_name)}</h1>
-        <p data-tool-description>正在加载工具。</p>
-      </div>
-      <a class="back" href="/">返回命令台</a>
-    </header>
-
-    <form class="tool-panel" data-tool-form>
-      <div class="tool-fields" data-tool-fields></div>
-      <button class="open tool-submit" type="submit" data-tool-submit>生成</button>
-    </form>
-
-    <section class="notice" data-tool-status hidden></section>
-    <section class="notice" data-tool-error hidden></section>
-    <section class="tool-daka" data-tool-daka hidden></section>
-    <section class="generated-files" data-tool-files></section>
-    <pre class="tool-output" data-tool-output></pre>
-  </main>
-</body>
-</html>
-"""
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run 家用命令台")
     parser.add_argument("--host", default="127.0.0.1")

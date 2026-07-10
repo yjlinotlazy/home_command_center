@@ -8,6 +8,7 @@ const submit = document.querySelector("[data-tool-submit]");
 const files = document.querySelector("[data-tool-files]");
 const dakaPane = document.querySelector("[data-tool-daka]");
 const mobileOutputQuery = window.matchMedia("(max-width: 720px)");
+const toolLayout = window.__COMMAND_TOOL_LAYOUT__ || "";
 let lastOutputText = "";
 let currentDakaDate = "";
 let currentDakaReport = "";
@@ -198,6 +199,20 @@ function sanitizeValue(input) {
   return input.value.trim();
 }
 
+function renderFields(args) {
+  const htmlByName = new Map(args.map((arg) => [arg.name, fieldHtml(arg)]));
+  const slots = fields.querySelectorAll("[data-tool-slot]");
+
+  if (toolLayout === "chinese-practice" && slots.length) {
+    for (const slot of slots) {
+      slot.innerHTML = htmlByName.get(slot.dataset.toolSlot) || "";
+    }
+    return;
+  }
+
+  fields.innerHTML = args.map(fieldHtml).join("");
+}
+
 async function loadTool() {
   const response = await fetch(`/api/tools/${encodeURIComponent(toolId)}`, { cache: "no-store" });
   const payload = await response.json();
@@ -217,7 +232,7 @@ async function loadTool() {
     return;
   }
 
-  fields.innerHTML = payload.args.map(fieldHtml).join("");
+  renderFields(payload.args);
 }
 
 form.addEventListener("submit", async (event) => {
@@ -229,7 +244,7 @@ form.addEventListener("submit", async (event) => {
 
   try {
     const payload = {};
-    for (const input of fields.querySelectorAll("input, textarea, select")) {
+    for (const input of form.querySelectorAll("input, textarea, select")) {
       payload[input.name] = sanitizeValue(input);
     }
 

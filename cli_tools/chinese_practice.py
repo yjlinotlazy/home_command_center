@@ -6,9 +6,61 @@ import re
 import sys
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-ROOT = Path(__file__).resolve().parent.parent
+from command_tools import get_command_tool
+from cli_tools.util import render_tool_arg_html, render_tool_page_shell
+
 WORKBOOK_ROOT = Path("/home/yli/e/Dropbox/github/workbook_go/chinese_chars")
+
+
+def render_tool_page() -> str:
+    tool = get_command_tool("chinese-practice")
+    schema = tool.to_schema()
+    args = {arg["name"]: arg for arg in schema["args"]}
+    return render_tool_page_shell(
+        tool.id,
+        tool.name,
+        tool.description,
+        body_html=(
+            """<form class="tool-panel tool-panel--practice" data-tool-form>
+      <div class="tool-fields tool-fields--practice" data-tool-fields>
+        <div class="tool-slot tool-slot--span-2" data-tool-slot="chars">"""
+            + render_tool_arg_html(args["chars"])
+            + """</div>
+        <div class="tool-slot tool-slot--span-2" data-tool-slot="output_dir">"""
+            + render_tool_arg_html(args["output_dir"])
+            + """</div>
+        <div class="tool-slot" data-tool-slot="density">"""
+            + render_tool_arg_html(args["density"])
+            + """</div>
+        <div class="tool-slot" data-tool-slot="paper">"""
+            + render_tool_arg_html(args["paper"])
+            + """</div>
+        <div class="tool-slot" data-tool-slot="mode">"""
+            + render_tool_arg_html(args["mode"])
+            + """</div>
+        <div class="tool-slot" data-tool-slot="copies">"""
+            + render_tool_arg_html(args["copies"])
+            + """</div>
+        <div class="tool-submit-row">
+          <button class="open tool-submit tool-submit--large" type="submit" data-tool-submit>生成</button>
+        </div>
+      </div>
+    </form>
+
+    <section class="notice" data-tool-status hidden></section>
+    <section class="notice" data-tool-error hidden></section>
+    <section class="tool-daka" data-tool-daka hidden></section>
+    <section class="generated-files" data-tool-files></section>
+    <pre class="tool-output" data-tool-output></pre>"""
+        ),
+        extra_stylesheets=("/static/chinese_practice.css",),
+        script_src="/static/chinese_practice.js",
+        script_type="module",
+    )
 
 
 def main() -> None:

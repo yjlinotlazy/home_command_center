@@ -1,0 +1,36 @@
+.tool-panel--practice {
+  display: block;
+}
+
+.tool-fields--practice {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.tool-slot--span-2 {
+  grid-column: span 2;
+}
+
+.tool-submit-row {
+  display: block;
+  grid-column: 1 / -1;
+}
+
+.tool-submit--large {
+  display: block;
+  width: 100%;
+  min-height: 52px;
+  font-size: 1.05rem;
+}
+
+@media (max-width: 720px) {
+  .tool-fields--practice {
+    grid-template-columns: 1fr;
+  }
+
+  .tool-slot--span-2,
+  .tool-submit-row {
+    grid-column: auto;
+  }
+}
