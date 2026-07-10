@@ -61,14 +61,13 @@ Create one YAML file per app in `~/.config/home_command_center/apps/`.
 ```yaml
 id: inspire
 name: Inspire
-url: "https://192.168.4.35:8001"
+url: "https://192.168.0.0:8001"
 thumbnail: ./thumb.png
 description: Inspiration browser
 tags:
   - writing
   - local
-health_url: "http://127.0.0.1:8001/"
-health_verify_tls: false
+health_url: "http://127.0.0.1:7001"
 ```
 
 Required fields:
@@ -87,7 +86,9 @@ Optional fields:
 
 `thumbnail` paths are resolved relative to the YAML file.
 
-`health_verify_tls` defaults to `true`. Set it to `false` for local HTTPS health checks when the app is reachable but Python does not trust the local mkcert CA.
+`health_url` is only used to extract the host and port to probe. 家用命令台 checks whether that port is listening; it does not make an HTTP request. Use the local backend port here, not the public Caddy port.
+
+`health_verify_tls` is retained for config compatibility, but it is not used by the current port-based health check.
 
 ## Command Tools
 
@@ -136,7 +137,7 @@ Example:
 
 ```bash
 mkcert -install
-mkcert 192.168.4.35
+mkcert 192.168.0.0
 ```
 
 Example Caddyfile:
@@ -146,16 +147,16 @@ Example Caddyfile:
     auto_https off
 }
 
-https://192.168.4.35:7000 {
-    bind 192.168.4.35
-    tls /path/to/192.168.4.35.pem /path/to/192.168.4.35-key.pem
+https://192.168.0.0:8000 {
+    bind 0.0.0.0
+    tls /path/to/192.168.0.0.pem /path/to/192.168.0.0-key.pem
     reverse_proxy 127.0.0.1:7000
 }
 
-https://192.168.4.35:8001 {
-    bind 192.168.4.35
-    tls /path/to/192.168.4.35.pem /path/to/192.168.4.35-key.pem
-    reverse_proxy 127.0.0.1:8001
+https://192.168.0.0:8001 {
+    bind 0.0.0.0
+    tls /path/to/192.168.0.0.pem /path/to/192.168.0.0-key.pem
+    reverse_proxy 127.0.0.1:7001
 }
 ```
 

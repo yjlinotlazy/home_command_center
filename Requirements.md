@@ -75,13 +75,13 @@ Example:
 ```yaml
 id: inspire
 name: Inspire
-url: "https://192.168.4.35:8001"
+url: "https://192.168.0.0:8001"
 thumbnail: ./thumb.png
 description: Inspiration browser
 tags:
   - writing
   - local
-health_url: "http://127.0.0.1:8001/"
+health_url: "http://127.0.0.1:7001/"
 health_verify_tls: false
 ```
 
@@ -90,7 +90,7 @@ health_verify_tls: false
 ```yaml
 id: inspire
 name: Inspire
-url: "https://192.168.4.35:8001"
+url: "https://192.168.0.0:8001"
 ```
 
 ### Optional Fields
@@ -101,7 +101,7 @@ description: Inspiration browser
 tags:
   - writing
   - local
-health_url: "http://127.0.0.1:8001/"
+health_url: "http://127.0.0.1:7001/"
 health_verify_tls: false
 ```
 
@@ -111,14 +111,15 @@ health_verify_tls: false
 * `name` is the user-facing display name.
 * `url` is the URL opened by household devices.
 * `thumbnail` is resolved relative to the YAML file unless absolute.
-* `health_url` is checked by 家用命令台 from the server. It may be different from `url`.
-* `health_verify_tls` defaults to `true`. Set it to `false` for local HTTPS health checks when Python does not trust the local mkcert CA.
+* `health_url` is used by 家用命令台 only to extract the host and port to probe. It may be different from `url` and should point at the local backend port.
+* Health checks are TCP port checks, not HTTP requests.
+* `health_verify_tls` is retained for config compatibility, but it is ignored by the current port-based health check.
 
 ## Health Checks
 
 Health checks are optional.
 
-If `health_url` is provided, 家用命令台 may periodically request it and show:
+If `health_url` is provided, 家用命令台 may periodically probe the host and port and show:
 
 * Online
 * Offline
@@ -217,9 +218,9 @@ The dashboard should provide an Open button for every configured app.
 For MVP, apps are expected to use their own HTTPS ports:
 
 ```text
-https://192.168.4.35:7000   # 家用命令台
-https://192.168.4.35:8001   # App 1
-https://192.168.4.35:8002   # App 2
+https://192.168.0.0:8000   # 家用命令台
+https://192.168.0.0:8001   # App 1
+https://192.168.0.0:8002   # App 2
 ```
 
 This is simpler and more reliable than path-based routing.
@@ -241,14 +242,14 @@ Example:
 
 ```bash
 mkcert -install
-mkcert 192.168.4.35
+mkcert 192.168.0.0
 ```
 
 This generates:
 
 ```text
-192.168.4.35.pem
-192.168.4.35-key.pem
+192.168.0.0.pem
+192.168.0.0-key.pem
 ```
 
 Example Caddyfile:
@@ -258,22 +259,22 @@ Example Caddyfile:
     auto_https off
 }
 
-https://192.168.4.35:7000 {
-    bind 192.168.4.35
-    tls /path/to/192.168.4.35.pem /path/to/192.168.4.35-key.pem
+https://192.168.0.0:8000 {
+    bind 0.0.0.0
+    tls /path/to/192.168.0.0.pem /path/to/192.168.0.0-key.pem
     reverse_proxy 127.0.0.1:7000
 }
 
-https://192.168.4.35:8001 {
-    bind 192.168.4.35
-    tls /path/to/192.168.4.35.pem /path/to/192.168.4.35-key.pem
-    reverse_proxy 127.0.0.1:8001
+https://192.168.0.0:8001 {
+    bind 0.0.0.0
+    tls /path/to/192.168.0.0.pem /path/to/192.168.0.0-key.pem
+    reverse_proxy 127.0.0.1:7001
 }
 
-https://192.168.4.35:8002 {
-    bind 192.168.4.35
-    tls /path/to/192.168.4.35.pem /path/to/192.168.4.35-key.pem
-    reverse_proxy 127.0.0.1:8002
+https://192.168.0.0:8002 {
+    bind 0.0.0.0
+    tls /path/to/192.168.0.0.pem /path/to/192.168.0.0-key.pem
+    reverse_proxy 127.0.0.1:7002
 }
 ```
 
