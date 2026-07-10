@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import io
+import os
 import sys
 from pathlib import Path
 
@@ -13,21 +14,23 @@ if str(REPO_ROOT) not in sys.path:
 
 from app_settings import eat_what_root
 from command_tools import get_command_tool
+from i18n import normalize_lang, tr
 from cli_tools.util import render_tool_page_shell
 
 EAT_WHAT_ROOT = eat_what_root()
 
 
-def render_tool_page() -> str:
+def render_tool_page(lang: str = "zh") -> str:
     tool = get_command_tool("eat-what")
     return render_tool_page_shell(
         tool.id,
-        tool.name,
-        tool.description,
+        tool.name_for(lang),
+        tool.description_for(lang),
+        lang=lang,
         body_html="""<form class="tool-panel tool-panel--eat-what" data-tool-form>
       <div class="tool-fields tool-fields--eat-what" data-tool-fields></div>
       <div class="tool-submit-row">
-        <button class="open tool-submit tool-submit--eat-what" type="submit" data-tool-submit>生成</button>
+        <button class="open tool-submit tool-submit--eat-what" type="submit" data-tool-submit>""" + tr(lang, "generate") + """</button>
       </div>
     </form>
 
@@ -40,6 +43,7 @@ def render_tool_page() -> str:
 
 
 def main() -> None:
+    lang = normalize_lang(os.environ.get("HCC_LANG"))
     parser = argparse.ArgumentParser(description="Run eat_what menu planner.")
     parser.add_argument("--action", choices=("plan", "list"), default="plan")
     parser.add_argument("--recipes", required=True)
@@ -53,7 +57,7 @@ def main() -> None:
 
     recipes = Path(args.recipes).expanduser().resolve()
     if not recipes.is_file():
-        raise SystemExit(f"菜谱文件不存在：{recipes}")
+        raise SystemExit(tr(lang, "recipes_missing", path=recipes))
 
     sys.path.insert(0, str(EAT_WHAT_ROOT / "src"))
     from eat_what import cli

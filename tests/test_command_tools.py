@@ -133,9 +133,12 @@ class CommandToolsTest(unittest.TestCase):
     def test_daka_date_default_is_today(self):
         self.assertEqual(_schema_arg("daka", "date")["default"], date.today().isoformat())
 
+    def test_schema_can_render_in_english(self):
+        self.assertEqual(_schema_arg("chinese-practice", "output_dir", lang="en")["label"], "Output directory")
 
-def _schema_arg(tool_id, name):
-    schema = get_command_tool(tool_id).to_schema()
+
+def _schema_arg(tool_id, name, lang=None):
+    schema = get_command_tool(tool_id).to_schema(lang)
     return next(arg for arg in schema["args"] if arg["name"] == name)
 
 

@@ -20,6 +20,8 @@ from command_tools import ToolError, get_command_tool, list_command_tools, run_c
 from app_settings import chinese_chars_output_dir
 from daka_bridge import DakaToolError, generate_report, load_state
 from cli_tools import chinese_practice, daka_checkin, eat_what
+from asset_urls import asset_url
+from i18n import normalize_lang, tr
 
 
 ROOT = Path(__file__).resolve().parent
@@ -142,7 +144,7 @@ class AppRegistry:
             source=path,
         )
 
-    def app_payload(self) -> dict[str, Any]:
+    def app_payload(self, lang: str = "zh") -> dict[str, Any]:
         apps = self.load()
         statuses = {app.id: self.health_status(app) for app in apps}
         command_tools = list_command_tools()
@@ -152,7 +154,7 @@ class AppRegistry:
         )
         return {
             "apps": [app.to_dict(statuses[app.id]) for app in apps]
-            + [tool.to_app_dict() for tool in command_tools],
+            + [tool.to_app_dict(lang) for tool in command_tools],
             "tags": all_tags,
         }
 
@@ -212,9 +214,10 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         path = unquote(parsed.path)
+        lang = _request_lang(parsed)
 
         if path == "/":
-            self._send_html(render_dashboard())
+            self._send_html(render_dashboard(lang))
             return
 
         if path.startswith("/tools/"):
@@ -222,18 +225,18 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 tool = get_command_tool(tool_id)
             except ToolError as exc:
-                self._send_error(404, str(exc))
+                self._send_error(404, tr(lang, "unknown_tool", tool=tool_id))
                 return
             renderer = TOOL_PAGE_RENDERERS.get(tool.id)
             if renderer is None:
-                self._send_error(500, f"No page renderer for tool {tool.id}")
+                self._send_error(500, tr(lang, "unknown_tool_page", tool=tool.id))
                 return
-            self._send_html(renderer())
+            self._send_html(renderer(lang))
             return
 
         if path == "/api/apps":
             try:
-                self._send_json(REGISTRY.app_payload())
+                self._send_json(REGISTRY.app_payload(lang))
             except ConfigError as exc:
                 self._send_json({"error": str(exc)}, status=500)
             return
@@ -250,9 +253,9 @@ class Handler(BaseHTTPRequestHandler):
                     else:
                         self._send_json(load_state(date_text))
                 else:
-                    self._send_json(get_command_tool(tool_id).to_schema())
+                    self._send_json(get_command_tool(tool_id).to_schema(lang))
             except ToolError as exc:
-                self._send_json({"error": str(exc)}, status=404)
+                self._send_json({"error": tr(lang, "unknown_tool", tool=tool_id)}, status=404)
             except DakaToolError as exc:
                 self._send_json({"error": str(exc)}, status=400)
             return
@@ -283,12 +286,13 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         parsed = urlparse(self.path)
         path = unquote(parsed.path)
+        lang = _request_lang(parsed)
 
         if path.startswith("/api/tools/") and path.endswith("/run"):
             tool_id = path.removeprefix("/api/tools/").removesuffix("/run").strip("/")
             try:
                 payload = self._read_json_body()
-                self._send_json(run_command_tool(tool_id, payload))
+                self._send_json(run_command_tool(tool_id, payload, lang))
             except ToolError as exc:
                 self._send_json({"error": str(exc)}, status=400)
             except ValueError as exc:
@@ -368,56 +372,73 @@ class Handler(BaseHTTPRequestHandler):
         return payload
 
 
-def render_dashboard() -> str:
-    title = "家用命令台"
+def render_dashboard(lang: str = "zh") -> str:
+    resolved_lang = normalize_lang(lang)
+    title = tr(resolved_lang, "dashboard_title")
     return f"""<!doctype html>
-<html lang="zh-CN">
+<html lang="{ 'en' if resolved_lang == 'en' else 'zh-CN' }">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{html.escape(title)}</title>
-  <link rel="stylesheet" href="/static/styles.css">
-  <script src="/static/app.js" defer></script>
+  <link rel="stylesheet" href="{asset_url('/static/styles.css')}">
+  <script>window.__HCC_LANG__ = {json.dumps(resolved_lang)};</script>
+  <script src="{asset_url('/static/i18n.js')}" defer></script>
+  <script src="{asset_url('/static/app.js')}" defer></script>
 </head>
 <body>
   <main class="shell">
     <header class="topbar">
       <div>
         <h1>{html.escape(title)}</h1>
-        <p>家里局域网里的应用和小工具。</p>
+        <p>{html.escape(tr(resolved_lang, "dashboard_subtitle"))}</p>
       </div>
-      <div class="count" data-count>0 个应用</div>
+      <form class="lang-switch" method="get">
+        <label class="select lang-select">
+          <span>{html.escape(tr(resolved_lang, "language"))}</span>
+          <select name="lang" data-lang-switcher>
+            <option value="zh"{' selected' if resolved_lang == 'zh' else ''}>{html.escape(tr(resolved_lang, "chinese"))}</option>
+            <option value="en"{' selected' if resolved_lang == 'en' else ''}>{html.escape(tr(resolved_lang, "english"))}</option>
+          </select>
+        </label>
+      </form>
+      <div class="count" data-count>{html.escape(tr(resolved_lang, "count_apps", count=0))}</div>
     </header>
 
-    <section class="toolbar" aria-label="筛选">
+    <section class="toolbar" aria-label="{html.escape(tr(resolved_lang, 'filters'))}">
       <label class="search">
-        <span>搜索</span>
-        <input data-search type="search" placeholder="名称、地址或描述" autocomplete="off">
+        <span>{html.escape(tr(resolved_lang, "search"))}</span>
+        <input data-search type="search" placeholder="{html.escape(tr(resolved_lang, 'search_placeholder'))}" autocomplete="off">
       </label>
       <label class="select">
-        <span>标签</span>
+        <span>{html.escape(tr(resolved_lang, "tags"))}</span>
         <select data-tag>
-          <option value="">全部标签</option>
+          <option value="">{html.escape(tr(resolved_lang, "all_tags"))}</option>
         </select>
       </label>
       <label class="select">
-        <span>状态</span>
+        <span>{html.escape(tr(resolved_lang, "status"))}</span>
         <select data-status>
-          <option value="">全部状态</option>
-          <option value="online">在线</option>
-          <option value="offline">离线</option>
-          <option value="unknown">未知</option>
+          <option value="">{html.escape(tr(resolved_lang, "all_status"))}</option>
+          <option value="online">{html.escape(tr(resolved_lang, "online"))}</option>
+          <option value="offline">{html.escape(tr(resolved_lang, "offline"))}</option>
+          <option value="unknown">{html.escape(tr(resolved_lang, "unknown"))}</option>
         </select>
       </label>
     </section>
 
     <section class="notice" data-error hidden></section>
     <section class="grid" data-apps></section>
-    <section class="empty" data-empty hidden>没有符合条件的应用。</section>
+    <section class="empty" data-empty hidden>{html.escape(tr(resolved_lang, "no_apps"))}</section>
   </main>
 </body>
 </html>
 """
+
+
+def _request_lang(parsed_url) -> str:
+    query = parse_qs(parsed_url.query)
+    return normalize_lang(query.get("lang", [None])[0])
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run 家用命令台")
     parser.add_argument("--host", default="127.0.0.1")

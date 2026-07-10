@@ -3,6 +3,9 @@ from __future__ import annotations
 import html
 import json
 
+from asset_urls import asset_url
+from i18n import normalize_lang, tr
+
 
 def render_tool_arg_html(arg: dict[str, object]) -> str:
     attrs = [
@@ -49,17 +52,21 @@ def render_tool_page_shell(
     tool_name: str,
     tool_description: str,
     *,
+    lang: str = "zh",
     body_html: str | None = None,
     extra_stylesheets: tuple[str, ...] = (),
     extra_head: str = "",
     script_src: str = "/static/tool.js",
     script_type: str | None = None,
 ) -> str:
-    title = f"{tool_name} - 家用命令台"
+    resolved_lang = normalize_lang(lang)
+    title = f"{tool_name} - {tr(resolved_lang, 'dashboard_title')}"
     if body_html is None:
         body_html = """<form class="tool-panel" data-tool-form>
       <div class="tool-fields" data-tool-fields></div>
-      <button class="open tool-submit" type="submit" data-tool-submit>生成</button>
+      <button class="open tool-submit" type="submit" data-tool-submit>"""
+        body_html += tr(resolved_lang, "generate")
+        body_html += """</button>
     </form>
 
     <section class="notice" data-tool-status hidden></section>
@@ -68,16 +75,18 @@ def render_tool_page_shell(
     <section class="generated-files" data-tool-files hidden></section>
     <pre class="tool-output" data-tool-output></pre>"""
     return f"""<!doctype html>
-<html lang="zh-CN">
+<html lang="{ 'en' if resolved_lang == 'en' else 'zh-CN' }">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{html.escape(title)}</title>
-  <link rel="stylesheet" href="/static/styles.css">
-  {"".join(f'<link rel="stylesheet" href="{html.escape(sheet)}">' for sheet in extra_stylesheets)}
+  <link rel="stylesheet" href="{asset_url('/static/styles.css')}">
+  <script>window.__HCC_LANG__ = {json.dumps(resolved_lang)};</script>
+  <script src="{asset_url('/static/i18n.js')}" defer></script>
+  {"".join(f'<link rel="stylesheet" href="{html.escape(asset_url(sheet))}">' for sheet in extra_stylesheets)}
   {extra_head}
   <script>window.__COMMAND_TOOL_ID__ = {json.dumps(tool_id)};</script>
-  <script src="{html.escape(script_src)}"{' type="' + html.escape(script_type) + '"' if script_type else ""} defer></script>
+  <script src="{html.escape(asset_url(script_src))}"{' type="' + html.escape(script_type) + '"' if script_type else ""} defer></script>
 </head>
 <body>
   <main class="shell tool-shell">
@@ -86,7 +95,16 @@ def render_tool_page_shell(
         <h1 data-tool-title>{html.escape(tool_name)}</h1>
         <p data-tool-description>{html.escape(tool_description)}</p>
       </div>
-      <a class="back" href="/">返回命令台</a>
+      <form class="lang-switch" method="get">
+        <label class="select lang-select">
+          <span>{tr(resolved_lang, 'language')}</span>
+          <select name="lang" data-lang-switcher>
+            <option value="zh"{' selected' if resolved_lang == 'zh' else ''}>{tr(resolved_lang, 'chinese')}</option>
+            <option value="en"{' selected' if resolved_lang == 'en' else ''}>{tr(resolved_lang, 'english')}</option>
+          </select>
+        </label>
+      </form>
+      <a class="back" href="/">{tr(resolved_lang, 'back_to_dashboard')}</a>
     </header>
     {body_html}
   </main>

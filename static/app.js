@@ -5,6 +5,22 @@ const state = {
   tag: "",
   status: "",
 };
+const i18n = window.__HCC_I18N || {
+  currentLang: () => (window.__HCC_LANG__ === "en" ? "en" : "zh"),
+  t: (key, value) => {
+    if (key === "count_apps") return `${value} 个应用`;
+    if (key === "open") return "打开";
+    if (key === "use") return "使用";
+    if (key === "online") return "在线";
+    if (key === "offline") return "离线";
+    if (key === "unknown") return "未知";
+    if (key === "no_description") return "没有描述。";
+    if (key === "load_apps_error") return "无法加载应用";
+    return key;
+  },
+};
+const lang = i18n.currentLang();
+const t = i18n.t;
 
 const els = {
   apps: document.querySelector("[data-apps]"),
@@ -17,9 +33,9 @@ const els = {
 };
 
 function statusLabel(status) {
-  if (status === "online") return "在线";
-  if (status === "offline") return "离线";
-  return "未知";
+  if (status === "online") return t("online");
+  if (status === "offline") return t("offline");
+  return t("unknown");
 }
 
 function initials(name) {
@@ -50,7 +66,7 @@ function renderApp(app) {
   const media = app.thumbnail
     ? `<img class="thumb" src="${escapeHtml(app.thumbnail)}" alt="">`
     : `<div class="fallback" aria-hidden="true">${escapeHtml(initials(app.name))}</div>`;
-  const actionLabel = app.kind === "command" ? "使用" : "打开";
+  const actionLabel = app.kind === "command" ? t("use") : t("open");
 
   return `<a class="card" data-card href="${escapeHtml(app.url)}" target="_blank" rel="noopener noreferrer">
     ${media}
@@ -62,7 +78,7 @@ function renderApp(app) {
         </div>
         <span class="status ${escapeHtml(app.status)}">${statusLabel(app.status)}</span>
       </div>
-      <div class="description">${escapeHtml(app.description || "没有描述。")}</div>
+      <div class="description">${escapeHtml(app.description || t("no_description"))}</div>
       ${renderTags(app.tags)}
       <span class="open card-action">${actionLabel}</span>
     </div>
@@ -86,7 +102,7 @@ function filteredApps() {
 function render() {
   const apps = filteredApps();
   els.apps.innerHTML = apps.map(renderApp).join("");
-  els.count.textContent = `${apps.length} 个应用`;
+  els.count.textContent = t("count_apps", apps.length);
   els.empty.hidden = apps.length !== 0;
 }
 
@@ -101,9 +117,11 @@ function renderTagOptions() {
 
 async function loadApps() {
   try {
-    const response = await fetch("/api/apps", { cache: "no-store" });
+    const url = new URL("/api/apps", window.location.origin);
+    if (lang === "en") url.searchParams.set("lang", lang);
+    const response = await fetch(url.toString(), { cache: "no-store" });
     const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || "无法加载应用");
+    if (!response.ok) throw new Error(payload.error || t("load_apps_error"));
 
     state.apps = payload.apps;
     state.tags = payload.tags;
@@ -111,7 +129,7 @@ async function loadApps() {
     render();
   } catch (error) {
     els.error.hidden = false;
-    els.error.textContent = error.message;
+    els.error.textContent = error.message || t("load_apps_error");
   }
 }
 

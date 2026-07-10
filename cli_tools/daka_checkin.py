@@ -14,9 +14,9 @@ from command_tools import get_command_tool
 from cli_tools.util import render_tool_page_shell
 
 
-def render_tool_page() -> str:
+def render_tool_page(lang: str = "zh") -> str:
     tool = get_command_tool("daka")
-    return render_tool_page_shell(tool.id, tool.name, tool.description)
+    return render_tool_page_shell(tool.id, tool.name_for(lang), tool.description_for(lang), lang=lang)
 
 
 def main() -> None:

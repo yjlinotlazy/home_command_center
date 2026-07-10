@@ -45,6 +45,27 @@ a {
   margin-bottom: 22px;
 }
 
+.lang-switch {
+  margin: 0;
+}
+
+.lang-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lang-select span {
+  color: var(--muted);
+  font-size: 0.86rem;
+  white-space: nowrap;
+}
+
+.lang-select select {
+  width: auto;
+  min-width: 132px;
+}
+
 h1 {
   margin: 0;
   font-size: clamp(2rem, 8vw, 3.7rem);
@@ -83,6 +104,17 @@ p {
 .select span {
   color: var(--muted);
   font-size: 0.86rem;
+}
+
+.lang-switch .lang-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lang-switch .lang-select span {
+  margin: 0;
+  white-space: nowrap;
 }
 
 input,

@@ -9,6 +9,43 @@ const files = document.querySelector("[data-tool-files]");
 const dakaPane = document.querySelector("[data-tool-daka]");
 const mobileOutputQuery = window.matchMedia("(max-width: 720px)");
 const toolLayout = window.__COMMAND_TOOL_LAYOUT__ || "";
+const i18n = window.__HCC_I18N || {
+  currentLang: () => (window.__HCC_LANG__ === "en" ? "en" : "zh"),
+  t: (key, value) => {
+    if (key === "open") return "打开";
+    if (key === "tool_load_error") return "无法加载工具";
+    if (key === "tool_run_error") return "工具运行失败";
+    if (key === "no_output") return "（没有输出）";
+    if (key === "load_daka_error") return "无法加载打卡数据";
+    if (key === "generate_report_error") return "无法生成报告";
+    if (key === "checkin_failed") return "打卡失败";
+    if (key === "checkin_done") return "打卡完成";
+    if (key === "date") return "日期";
+    if (key === "report_task_summary") return "生成任务汇总";
+    if (key === "report_resolution_summary") return "生成愿望汇总";
+    if (key === "report_task_summary_done") return "任务汇总已生成。";
+    if (key === "report_resolution_summary_done") return "愿望汇总已生成。";
+    if (key === "report_task_summary_loading") return "正在生成任务汇总。";
+    if (key === "report_resolution_summary_loading") return "正在生成愿望汇总。";
+    if (key === "no_daka_items") return "还没有打卡项目。";
+    if (key === "no_data") return "没有可显示的数据。";
+    if (key === "today_checked") return "今天已打卡";
+    if (key === "click_to_checkin") return "点击打卡";
+    if (key === "count_items") return `${value} 项`;
+    if (key === "total_checkins") return `累计 ${value} 次`;
+    if (key === "annual_progress") return "年度进度";
+    if (key === "weekly_progress") return "周度进度";
+    if (key === "day_short") return "日";
+    if (key === "week_short") return "周";
+    if (key === "daka_task_summary") return "任务汇总";
+    if (key === "daka_resolution_summary") return "愿望汇总";
+    if (key === "task_level") return "任务级别";
+    if (key === "resolution_level") return "愿望级别";
+    return key;
+  },
+};
+const lang = i18n.currentLang();
+const t = i18n.t;
 let lastOutputText = "";
 let currentDakaDate = "";
 let currentDakaReport = "";
@@ -214,9 +251,11 @@ function renderFields(args) {
 }
 
 async function loadTool() {
-  const response = await fetch(`/api/tools/${encodeURIComponent(toolId)}`, { cache: "no-store" });
+  const url = new URL(`/api/tools/${encodeURIComponent(toolId)}`, window.location.origin);
+  if (lang === "en") url.searchParams.set("lang", lang);
+  const response = await fetch(url.toString(), { cache: "no-store" });
   const payload = await response.json();
-  if (!response.ok) throw new Error(payload.error || "无法加载工具");
+  if (!response.ok) throw new Error(payload.error || t("tool_load_error"));
 
   document.querySelector("[data-tool-title]").textContent = payload.name;
   document.querySelector("[data-tool-description]").textContent = payload.description;
@@ -248,15 +287,17 @@ form.addEventListener("submit", async (event) => {
       payload[input.name] = sanitizeValue(input);
     }
 
-    const response = await fetch(`/api/tools/${encodeURIComponent(toolId)}/run`, {
+    const url = new URL(`/api/tools/${encodeURIComponent(toolId)}/run`, window.location.origin);
+    if (lang === "en") url.searchParams.set("lang", lang);
+    const response = await fetch(url.toString(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
     const result = await response.json();
-    if (!response.ok) throw new Error(result.error || "工具运行失败");
+    if (!response.ok) throw new Error(result.error || t("tool_run_error"));
 
-    lastOutputText = result.stdout || result.stderr || "（没有输出）";
+    lastOutputText = result.stdout || result.stderr || t("no_output");
     renderOutputText(lastOutputText);
     output.classList.toggle("failed", !result.ok);
     renderFiles(result.files || []);
@@ -286,7 +327,7 @@ function renderFiles(generatedFiles) {
     link.href = file.url;
     link.target = "_blank";
     link.rel = "noopener noreferrer";
-    link.textContent = `打开 ${file.name}`;
+    link.textContent = `${t("open")} ${file.name}`;
     files.append(link);
   }
 }
@@ -296,10 +337,12 @@ async function loadDakaState(dateValue, statusMessage = "") {
   if (!statusMessage) {
     clearStatus();
   }
-  const query = currentDakaDate ? `?date=${encodeURIComponent(currentDakaDate)}` : "";
-  const response = await fetch(`/api/tools/daka${query}`, { cache: "no-store" });
+  const url = new URL("/api/tools/daka", window.location.origin);
+  if (lang === "en") url.searchParams.set("lang", lang);
+  if (currentDakaDate) url.searchParams.set("date", currentDakaDate);
+  const response = await fetch(url.toString(), { cache: "no-store" });
   const payload = await response.json();
-  if (!response.ok) throw new Error(payload.error || "无法加载打卡数据");
+  if (!response.ok) throw new Error(payload.error || t("load_daka_error"));
   renderDakaTool(payload);
   if (currentDakaReport) {
     const reportPane = dakaPane.querySelector("[data-daka-report-panel]");
@@ -322,15 +365,15 @@ function renderDakaTool(payload) {
   dakaPane.innerHTML = `
     <div class="daka-controls">
       <label class="tool-field daka-date-field">
-        <span>日期</span>
+        <span>${t("date")}</span>
         <input type="date" data-daka-date value="${escapeHtml(payload.date)}">
       </label>
     </div>
     <div class="daka-grid" data-daka-grid></div>
     <div class="daka-bottom">
       <div class="daka-actions">
-        <button type="button" class="open daka-action" data-daka-report-button="summary">生成任务汇总</button>
-        <button type="button" class="open daka-action" data-daka-report-button="resolution-summary">生成愿望汇总</button>
+        <button type="button" class="open daka-action" data-daka-report-button="summary">${t("report_task_summary")}</button>
+        <button type="button" class="open daka-action" data-daka-report-button="resolution-summary">${t("report_resolution_summary")}</button>
       </div>
       <section class="notice daka-report-status" data-daka-report-status hidden></section>
       <section class="daka-report" data-daka-report-panel hidden></section>
@@ -357,7 +400,7 @@ function renderDakaTool(payload) {
   if (!payload.resolutions.length) {
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.textContent = "还没有打卡项目。";
+    empty.textContent = t("no_daka_items");
     grid.append(empty);
     return;
   }
@@ -375,7 +418,7 @@ function renderDakaTool(payload) {
 
     const count = document.createElement("span");
     count.className = "daka-resolution-count";
-    count.textContent = `${resolution.items.length} 项`;
+    count.textContent = t("count_items", resolution.items.length);
     header.append(count);
 
     const items = document.createElement("div");
@@ -385,7 +428,7 @@ function renderDakaTool(payload) {
       const row = document.createElement("button");
       row.type = "button";
       row.className = `daka-item daka-item-row${item.checked ? " is-checked" : ""}`;
-      row.setAttribute("aria-label", item.checked ? `${item.name}，今天已打卡` : `${item.name}，点击打卡`);
+      row.setAttribute("aria-label", item.checked ? `${item.name}, ${t("today_checked")}` : `${item.name}, ${t("click_to_checkin")}`);
       if (item.checked) {
         row.setAttribute("aria-disabled", "true");
       }
@@ -400,12 +443,12 @@ function renderDakaTool(payload) {
 
       const meta = document.createElement("div");
       meta.className = "daka-item-meta";
-      meta.textContent = `累计 ${item.checkin_count} 次`;
+      meta.textContent = t("total_checkins", item.checkin_count);
       label.append(meta);
 
       const badge = document.createElement("span");
       badge.className = "daka-item-badge";
-      badge.textContent = item.checked ? "已打卡" : "打卡";
+      badge.textContent = item.checked ? t("today_checked") : t("click_to_checkin");
 
       row.addEventListener("click", () => {
         if (item.checked) return;
@@ -429,14 +472,19 @@ async function loadDakaReport(reportKind, reportPane, reportStatus, announce = t
   query.set("report", reportKind);
   if (announce) {
     reportStatus.hidden = false;
-    reportStatus.textContent = reportKind === "summary" ? "正在生成任务汇总。" : "正在生成愿望汇总。";
+    reportStatus.textContent = reportKind === "summary" ? t("report_task_summary_loading") : t("report_resolution_summary_loading");
   }
-  const response = await fetch(`/api/tools/daka?${query.toString()}`, { cache: "no-store" });
+  const url = new URL("/api/tools/daka", window.location.origin);
+  if (lang === "en") url.searchParams.set("lang", lang);
+  for (const [key, value] of query.entries()) {
+    url.searchParams.set(key, value);
+  }
+  const response = await fetch(url.toString(), { cache: "no-store" });
   const payload = await response.json();
-  if (!response.ok) throw new Error(payload.error || "无法生成报告");
+  if (!response.ok) throw new Error(payload.error || t("generate_report_error"));
   renderDakaReport(payload, reportPane);
   reportStatus.hidden = false;
-  reportStatus.textContent = reportKind === "summary" ? "任务汇总已生成。" : "愿望汇总已生成。";
+  reportStatus.textContent = reportKind === "summary" ? t("report_task_summary_done") : t("report_resolution_summary_done");
   if (announce) {
     showStatus(reportStatus.textContent);
   }
@@ -445,16 +493,16 @@ async function loadDakaReport(reportKind, reportPane, reportStatus, announce = t
 function renderDakaReport(payload, reportPane) {
   reportPane.hidden = false;
   if (!payload.groups.length) {
-    reportPane.innerHTML = `<div class="empty">没有可显示的数据。</div>`;
+    reportPane.innerHTML = `<div class="empty">${t("no_data")}</div>`;
     return;
   }
 
-  const title = payload.report_kind === "summary" ? "任务汇总" : "愿望汇总";
+  const title = payload.report_kind === "summary" ? t("daka_task_summary") : t("daka_resolution_summary");
   const rows = payload.groups
     .map((group, index) => {
       const accent = cssColorForResolution(group.color, index);
       const label = payload.report_kind === "summary" ? `${group.resolution} / ${group.item}` : group.resolution;
-      const subtitle = payload.report_kind === "summary" ? "任务级别" : "愿望级别";
+      const subtitle = payload.report_kind === "summary" ? t("task_level") : t("resolution_level");
       return `
         <article class="daka-report-card" style="--report-accent:${accent}">
           <div class="daka-report-head">
@@ -463,18 +511,18 @@ function renderDakaReport(payload, reportPane) {
               <div class="daka-report-sub">${subtitle}</div>
             </div>
             <div class="daka-report-badges">
-              <span class="daka-report-badge">日 ${escapeHtml(group.checked_days)}/${escapeHtml(group.day_total)}</span>
-              <span class="daka-report-badge">周 ${escapeHtml(group.checked_weeks)}/${escapeHtml(group.week_total)}</span>
+              <span class="daka-report-badge">${t("day_short")} ${escapeHtml(group.checked_days)}/${escapeHtml(group.day_total)}</span>
+              <span class="daka-report-badge">${t("week_short")} ${escapeHtml(group.checked_weeks)}/${escapeHtml(group.week_total)}</span>
             </div>
           </div>
           <div class="daka-report-bars">
             <div class="daka-report-barline">
-              <span>年度进度</span>
+              <span>${t("annual_progress")}</span>
               <strong>${group.day_percent.toFixed(2)}%</strong>
             </div>
             <div class="daka-progress"><span style="width:${Math.min(group.day_percent, 100)}%"></span></div>
             <div class="daka-report-barline">
-              <span>周度进度</span>
+              <span>${t("weekly_progress")}</span>
               <strong>${group.week_percent.toFixed(2)}%</strong>
             </div>
             <div class="daka-progress daka-progress-week"><span style="width:${Math.min(group.week_percent, 100)}%"></span></div>
@@ -493,7 +541,9 @@ function renderDakaReport(payload, reportPane) {
 async function handleDakaCheckin(resolutionName, itemName) {
   clearError();
   clearStatus();
-  const response = await fetch(`/api/tools/daka/run`, {
+  const url = new URL("/api/tools/daka/run", window.location.origin);
+  if (lang === "en") url.searchParams.set("lang", lang);
+  const response = await fetch(url.toString(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -503,8 +553,8 @@ async function handleDakaCheckin(resolutionName, itemName) {
     }),
   });
   const result = await response.json();
-  if (!response.ok) throw new Error(result.error || "打卡失败");
+  if (!response.ok) throw new Error(result.error || t("checkin_failed"));
 
-  showStatus(result.stdout || result.message || "打卡完成");
+  showStatus(result.stdout || result.message || t("checkin_done"));
   await loadDakaState(result.date || currentDakaDate, result.stdout || result.message || "");
 }

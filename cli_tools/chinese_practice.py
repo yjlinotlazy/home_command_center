@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
@@ -12,19 +13,21 @@ if str(REPO_ROOT) not in sys.path:
 
 from app_settings import workbook_go_root
 from command_tools import get_command_tool
+from i18n import normalize_lang, tr
 from cli_tools.util import render_tool_arg_html, render_tool_page_shell
 
 WORKBOOK_ROOT = workbook_go_root() / "chinese_chars"
 
 
-def render_tool_page() -> str:
+def render_tool_page(lang: str = "zh") -> str:
     tool = get_command_tool("chinese-practice")
-    schema = tool.to_schema()
+    schema = tool.to_schema(lang)
     args = {arg["name"]: arg for arg in schema["args"]}
     return render_tool_page_shell(
         tool.id,
-        tool.name,
-        tool.description,
+        tool.name_for(lang),
+        tool.description_for(lang),
+        lang=lang,
         body_html=(
             """<form class="tool-panel tool-panel--practice" data-tool-form>
       <div class="tool-fields tool-fields--practice" data-tool-fields>
@@ -47,7 +50,7 @@ def render_tool_page() -> str:
             + render_tool_arg_html(args["copies"])
             + """</div>
         <div class="tool-submit-row">
-          <button class="open tool-submit tool-submit--large" type="submit" data-tool-submit>生成</button>
+          <button class="open tool-submit tool-submit--large" type="submit" data-tool-submit>""" + tr(lang, "generate") + """</button>
         </div>
       </div>
     </form>
@@ -65,6 +68,7 @@ def render_tool_page() -> str:
 
 
 def main() -> None:
+    lang = normalize_lang(os.environ.get("HCC_LANG"))
     parser = argparse.ArgumentParser(description="Generate a Chinese practice PDF.")
     parser.add_argument("--chars", required=True)
     parser.add_argument("--density", type=int, default=5)
@@ -74,7 +78,7 @@ def main() -> None:
     parser.add_argument("--output-dir", required=True)
     args = parser.parse_args()
 
-    chars = _validate_chars(args.chars)
+    chars = _validate_chars(args.chars, lang)
     output_dir = Path(args.output_dir).expanduser().resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     before = {path.resolve() for path in output_dir.glob("*.pdf")}
@@ -84,8 +88,6 @@ def main() -> None:
 
     previous_cwd = Path.cwd()
     try:
-        import os
-
         os.chdir(output_dir)
         workbook_main(
             argv=[
@@ -107,14 +109,14 @@ def main() -> None:
     print(f"HCC_FILE={output_path}")
 
 
-def _validate_chars(raw: str) -> str:
+def _validate_chars(raw: str, lang: str) -> str:
     chars = raw.strip()
     if not chars:
-        raise SystemExit("Characters are required")
+        raise SystemExit(tr(lang, "required_field", label=tr(lang, "practice_chars")))
     if len(chars) > 40:
-        raise SystemExit("Characters must be 40 characters or fewer")
+        raise SystemExit(tr(lang, "chars_too_long"))
     if not re.fullmatch(r"[\u3400-\u9fff]+", chars):
-        raise SystemExit("Only Chinese characters are supported")
+        raise SystemExit(tr(lang, "chars_only_chinese"))
     return chars
 
 
