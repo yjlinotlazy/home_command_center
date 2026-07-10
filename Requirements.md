@@ -162,7 +162,7 @@ The backend must:
 
 ### Chinese Practice PDF Tool
 
-The first real command tool wraps the workbook generator from `/home/yli/e/Dropbox/github/workbook_go`.
+The first real command tool wraps the workbook generator from `<workbook_go_repo>`.
 
 It should generate Chinese handwriting practice PDFs from:
 
@@ -182,12 +182,12 @@ Example command center config:
 ```yaml
 type: command_tool
 chinese_chars:
-  output_dir: /home/yli/.config/home_command_center/output
+  output_dir: <home_command_center_output_dir>
 ```
 
 ### Eat What Tool
 
-The second command tool wraps `/home/yli/e/Dropbox/github/eat_what`.
+The second command tool wraps `<eat_what_repo>`.
 
 It should support:
 
@@ -200,7 +200,7 @@ It should not wrap the interactive `eat-what-recipe` or `eat-what-pick` flows un
 
 ### New Year Resolution Tool
 
-The `daka` tool wraps `/home/yli/e/Dropbox/github/new_year_resolution_tracker`.
+The `daka` tool wraps `<new_year_resolution_tracker_repo>`.
 
 It should:
 

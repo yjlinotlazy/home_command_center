@@ -10,10 +10,11 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from app_settings import workbook_go_root
 from command_tools import get_command_tool
 from cli_tools.util import render_tool_arg_html, render_tool_page_shell
 
-WORKBOOK_ROOT = Path("/home/yli/e/Dropbox/github/workbook_go/chinese_chars")
+WORKBOOK_ROOT = workbook_go_root() / "chinese_chars"
 
 
 def render_tool_page() -> str:

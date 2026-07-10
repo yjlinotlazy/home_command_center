@@ -5,8 +5,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from app_settings import daka_tracker_root
 
-DAKA_SRC = Path("/home/yli/Dropbox/github/new_year_resolution_tracker/src")
+
+DAKA_SRC = daka_tracker_root() / "src"
 
 
 class DakaToolError(Exception):

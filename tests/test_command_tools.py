@@ -4,6 +4,7 @@ from pathlib import Path
 from datetime import date
 
 import app_settings
+from app_settings import eat_what_recipes_csv
 from command_tools import ToolError, get_command_tool, list_command_tools, run_command_tool
 
 
@@ -80,7 +81,7 @@ class CommandToolsTest(unittest.TestCase):
             "eat-what",
             {
                 "action": "list",
-                "recipes": "/home/yli/e/Dropbox/github/eat_what/data/recipes.csv",
+                "recipes": str(eat_what_recipes_csv()),
                 "max_time": "",
                 "max_weekly_time": "400",
                 "max_overlap": "6",

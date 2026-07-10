@@ -1,62 +1,62 @@
 # 家用命令台
 
-家用命令台 is a household dashboard for local web apps and repo-owned command tools on the same trusted LAN.
+家用命令台是一个家庭内部的仪表盘，用来管理同一可信局域网里的本地 Web 应用和仓库内的命令行工具。
 
-It does not start, stop, or supervise external services. You run your web apps yourself, expose them over LAN HTTPS, and list them in `~/.config/home_command_center/apps/*.yaml`.
+它不会启动、停止或托管外部服务。Web 应用由你自己运行，通过局域网 HTTPS 暴露出来，并写进 `~/.config/home_command_center/apps/*.yaml`。
 
-Command tools are different: they are small CLI scripts coded in this repo and exposed through controlled web forms. 家用命令台 does not run arbitrary commands from user config.
+命令行工具不一样：它们是本仓库里的小型 CLI 脚本，通过受控的 Web 表单暴露出来。家用命令台不会从用户配置里执行任意命令。
 
-## Run
+## 运行
 
-Install dependencies:
+安装依赖：
 
 ```bash
 python3 -m pip install -r requirements.txt
 ```
 
-Start the dashboard:
+启动仪表盘：
 
 ```bash
 python3 server.py --host 127.0.0.1 --port 7000
 ```
 
-Open:
+打开：
 
 ```text
 http://127.0.0.1:7000
 ```
 
-For household devices, serve the dashboard through Caddy over HTTPS.
+家庭设备上建议通过 Caddy 用 HTTPS 访问这个仪表盘。
 
-By default, app config is loaded from:
+默认情况下，应用配置从下面读取：
 
 ```text
 ~/.config/home_command_center/apps/*.yaml
 ```
 
-The workbook tool has app-specific settings in:
+工作簿工具的单独配置在：
 
 ```text
 ~/.config/home_command_center/apps/workbook_go.yaml
 ```
 
-Current workbook setting:
+当前工作簿配置示例：
 
 ```yaml
 type: command_tool
 chinese_chars:
-  output_dir: /home/yli/.config/home_command_center/output
+  output_dir: <home_command_center_output_dir>
 ```
 
-For development, you can point at another config directory:
+开发时可以指向另一个配置目录：
 
 ```bash
 python3 server.py --apps-dir ./apps
 ```
 
-## App Config
+## 应用配置
 
-Create one YAML file per app in `~/.config/home_command_center/apps/`.
+在 `~/.config/home_command_center/apps/` 里为每个应用创建一个 YAML 文件。
 
 ```yaml
 id: inspire
@@ -70,13 +70,13 @@ tags:
 health_url: "http://127.0.0.1:7001"
 ```
 
-Required fields:
+必填字段：
 
 * `id`
 * `name`
 * `url`
 
-Optional fields:
+可选字段：
 
 * `thumbnail`
 * `description`
@@ -84,63 +84,63 @@ Optional fields:
 * `health_url`
 * `health_verify_tls`
 
-`thumbnail` paths are resolved relative to the YAML file.
+`thumbnail` 路径会相对 YAML 文件解析。
 
-`health_url` is only used to extract the host and port to probe. 家用命令台 checks whether that port is listening; it does not make an HTTP request. Use the local backend port here, not the public Caddy port.
+`health_url` 只用于提取要探测的 host 和 port。家用命令台只检查这个端口是否在监听，不会发 HTTP 请求。这里要填本地后端端口，不是公开的 Caddy 端口。
 
-`health_verify_tls` is retained for config compatibility, but it is not used by the current port-based health check.
+`health_verify_tls` 只是为了兼容旧配置，但当前基于端口的健康检查不会用到它。
 
-## Command Tools
+## 命令行工具
 
-Repo-owned command tools live in `cli_tools/` and are registered in `command_tools.py`.
+仓库内的命令行工具放在 `cli_tools/`，并在 `command_tools.py` 里注册。
 
-The dashboard automatically lists registered command tools alongside configured web apps. Clicking a command tool opens a form page such as:
+仪表盘会把已注册的命令行工具和配置好的 Web 应用一起列出来。点击命令行工具会打开一个表单页，例如：
 
 ```text
 /tools/slugify
 ```
 
-The frontend constrains fields using the registered schema. The backend validates the same inputs again, builds an argv list, and runs the registered script without a shell.
+前端会根据注册的 schema 限制字段。后端会再校验一遍同样的输入，组装 argv 列表，然后不通过 shell 直接运行注册脚本。
 
-Current tool:
+当前工具：
 
-* `chinese-practice`: generates printable Chinese handwriting practice PDFs using the workbook generator from `/home/yli/e/Dropbox/github/workbook_go`
-* `eat-what`: generates a weekly menu or lists recipes using `/home/yli/e/Dropbox/github/eat_what`
-* `daka`: shows all existing new year resolutions and tasks from `/home/yli/e/Dropbox/github/new_year_resolution_tracker` and lets you check them off one by one by date
+* `chinese-practice`：使用 `workbook_go` 生成可打印的中文练字 PDF
+* `eat-what`：生成周菜单，或列出食谱
+* `daka`：显示 `new_year_resolution_tracker` 里的所有新年愿望和任务，并支持按日期逐个打卡
 
-`eat-what` currently exposes the non-interactive planner and recipe-list modes. The interactive `eat-what-recipe` and `eat-what-pick` commands are not wrapped yet.
+`eat-what` 目前只暴露非交互式的 planner 和 recipe-list 模式。交互式的 `eat-what-recipe` 和 `eat-what-pick` 还没有封装。
 
-`daka` is web-first: the page loads the full resolution tree, includes a date picker defaulted to today, each task gets its own check-in button, and the page can generate task or resolution reports. Rename/add flows stay in the original CLI.
+`daka` 是 web-first：页面会加载完整的愿望树，带一个默认指向今天的日期选择器，每个任务都有自己的打卡按钮，页面还能生成任务或愿望汇总。重命名和新增仍留在原始 CLI 里。
 
-To add a command tool:
+添加命令行工具时：
 
-* Add a CLI script under `cli_tools/`
-* Register it in `command_tools.py`
-* Define each accepted argument with `ToolArg`
-* Keep the CLI script non-interactive and bounded
-* If the tool generates files, write them under its configured output directory
+* 在 `cli_tools/` 下面添加一个 CLI 脚本
+* 在 `command_tools.py` 里注册它
+* 用 `ToolArg` 定义每个接受的参数
+* 保持 CLI 脚本非交互且有边界
+* 如果工具会生成文件，就写到它自己的配置输出目录里
 
-For `chinese-practice`, the output directory field defaults to `chinese_chars.output_dir` from `~/.config/home_command_center/apps/workbook_go.yaml`. The user may override it in the form for a single run. The wrapper does not pass a PDF filename to workbook_go; it changes into the chosen output directory and lets workbook_go use its default filename pattern, such as `practice_20260710.pdf`.
+对于 `chinese-practice`，输出目录字段默认来自 `~/.config/home_command_center/apps/workbook_go.yaml` 里的 `chinese_chars.output_dir`。用户可以在表单里为单次运行覆盖这个目录。包装器不会给 `workbook_go` 传 PDF 文件名；它会切换到选定的输出目录，让 `workbook_go` 使用自己的默认文件名模式，例如 `practice_20260710.pdf`。
 
-## LAN HTTPS
+## 局域网 HTTPS
 
-Recommended setup:
+推荐做法：
 
-* Install Caddy
-* Install mkcert
-* Generate a local certificate for the server IP
-* Trust the mkcert root certificate on household client devices
-* Run each app on localhost
-* Let Caddy expose the dashboard and apps over HTTPS
+* 安装 Caddy
+* 安装 mkcert
+* 为服务器 IP 生成本地证书
+* 在家庭客户端设备上信任 mkcert 根证书
+* 每个应用自己运行在 localhost
+* 让 Caddy 通过 HTTPS 暴露仪表盘和各个应用
 
-Example:
+示例：
 
 ```bash
 mkcert -install
 mkcert 192.168.0.0
 ```
 
-Example Caddyfile:
+示例 Caddyfile：
 
 ```caddy
 {
@@ -160,17 +160,17 @@ https://192.168.0.0:8001 {
 }
 ```
 
-Format and run Caddy:
+格式化并运行 Caddy：
 
 ```bash
 caddy fmt --overwrite Caddyfile
 sudo caddy run --config Caddyfile
 ```
 
-To trust the local CA on client devices:
+要在客户端设备上信任本地 CA：
 
 ```bash
 mkcert -CAROOT
 ```
 
-Copy `rootCA.pem` to each client device. Do not copy the root CA key file.
+把 `rootCA.pem` 拷到每台客户端设备上。不要拷贝根 CA 的私钥文件。

@@ -13,7 +13,7 @@ class AppRegistryTest(unittest.TestCase):
                 """
 id: demo
 name: Demo
-url: "https://192.168.4.35:8001"
+url: "https://example.test:8001"
 thumbnail: ./thumb.png
 description: Demo app
 tags:

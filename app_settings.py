@@ -8,6 +8,7 @@ import yaml
 
 CONFIG_DIR = Path.home() / ".config" / "home_command_center"
 APPS_DIR = CONFIG_DIR / "apps"
+ROOT_CONFIG = CONFIG_DIR / "config.yaml"
 WORKBOOK_GO_CONFIG = APPS_DIR / "workbook_go.yaml"
 DEFAULT_CHINESE_CHARS_OUTPUT_DIR = CONFIG_DIR / "output"
 
@@ -34,6 +35,22 @@ def chinese_chars_output_dir(config_path: Path | None = None) -> Path:
     return Path(output_dir).expanduser().resolve()
 
 
+def workbook_go_root(config_path: Path | None = None) -> Path:
+    return _root_path("workbook_go", config_path)
+
+
+def eat_what_root(config_path: Path | None = None) -> Path:
+    return _root_path("eat_what", config_path)
+
+
+def daka_tracker_root(config_path: Path | None = None) -> Path:
+    return _root_path("daka_tracker", config_path)
+
+
+def eat_what_recipes_csv(config_path: Path | None = None) -> Path:
+    return (eat_what_root(config_path) / "data" / "recipes.csv").resolve()
+
+
 def _load_mapping(config_path: Path) -> dict[str, Any]:
     if not config_path.exists():
         return {}
@@ -48,3 +65,19 @@ def _load_mapping(config_path: Path) -> dict[str, Any]:
     if not isinstance(raw, dict):
         raise AppSettingsError(f"{config_path} must contain a YAML mapping")
     return raw
+
+
+def _root_path(key: str, config_path: Path | None = None) -> Path:
+    if config_path is None:
+        config_path = ROOT_CONFIG
+    raw = _load_mapping(config_path)
+    repo_roots = raw.get("repo_roots", {})
+    if repo_roots is None:
+        repo_roots = {}
+    if not isinstance(repo_roots, dict):
+        raise AppSettingsError(f"{config_path} field 'repo_roots' must be a mapping")
+
+    root = repo_roots.get(key)
+    if not isinstance(root, str) or not root.strip():
+        raise AppSettingsError(f"{config_path} field 'repo_roots.{key}' must be a non-empty string")
+    return Path(root).expanduser().resolve()

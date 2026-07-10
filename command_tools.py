@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
-from app_settings import chinese_chars_output_dir
+from app_settings import chinese_chars_output_dir, eat_what_recipes_csv
 
 
 ROOT = Path(__file__).resolve().parent
@@ -204,8 +204,8 @@ COMMAND_TOOLS: dict[str, CommandTool] = {
                 name="recipes",
                 label="菜谱 CSV",
                 flag="--recipes",
-                default="/home/yli/e/Dropbox/github/eat_what/data/recipes.csv",
-                placeholder="/home/yli/e/Dropbox/github/eat_what/data/recipes.csv",
+                default="",
+                placeholder="recipes.csv",
                 help="必须符合 eat_what 的 recipes.csv 格式。",
                 max_length=500,
             ),
@@ -355,6 +355,8 @@ def _output_root_for_payload(payload: dict[str, Any]) -> Path:
 def _arg_default(tool_id: str | None, arg: ToolArg) -> str:
     if tool_id == "daka" and arg.name == "date":
         return dt.date.today().isoformat()
+    if tool_id == "eat-what" and arg.name == "recipes":
+        return str(eat_what_recipes_csv())
     if tool_id == "chinese-practice" and arg.name == "output_dir":
         return str(chinese_chars_output_dir())
     return arg.default

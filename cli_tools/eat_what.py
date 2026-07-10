@@ -11,10 +11,11 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from app_settings import eat_what_root
 from command_tools import get_command_tool
 from cli_tools.util import render_tool_page_shell
 
-EAT_WHAT_ROOT = Path("/home/yli/e/Dropbox/github/eat_what")
+EAT_WHAT_ROOT = eat_what_root()
 
 
 def render_tool_page() -> str:
