@@ -1,14 +1,15 @@
 import unittest
 import tempfile
 from pathlib import Path
+from datetime import date
 
 import app_settings
 from command_tools import ToolError, get_command_tool, list_command_tools, run_command_tool
 
 
 class CommandToolsTest(unittest.TestCase):
-    def test_only_workbook_tool_is_registered(self):
-        self.assertEqual([tool.id for tool in list_command_tools()], ["eat-what", "chinese-practice"])
+    def test_tools_are_registered(self):
+        self.assertEqual([tool.id for tool in list_command_tools()], ["eat-what", "daka", "chinese-practice"])
 
     def test_rejects_unknown_tool(self):
         with self.assertRaisesRegex(ToolError, "Unknown command tool"):
@@ -118,19 +119,22 @@ class CommandToolsTest(unittest.TestCase):
                 app_settings.WORKBOOK_GO_CONFIG = config
 
                 config.write_text("chinese_chars:\n  output_dir: /tmp/one\n", encoding="utf-8")
-                first = _schema_arg("output_dir")["default"]
+                first = _schema_arg("chinese-practice", "output_dir")["default"]
 
                 config.write_text("chinese_chars:\n  output_dir: /tmp/two\n", encoding="utf-8")
-                second = _schema_arg("output_dir")["default"]
+                second = _schema_arg("chinese-practice", "output_dir")["default"]
 
                 self.assertEqual(first, "/tmp/one")
                 self.assertEqual(second, "/tmp/two")
             finally:
                 app_settings.WORKBOOK_GO_CONFIG = original_app_path
 
+    def test_daka_date_default_is_today(self):
+        self.assertEqual(_schema_arg("daka", "date")["default"], date.today().isoformat())
 
-def _schema_arg(name):
-    schema = get_command_tool("chinese-practice").to_schema()
+
+def _schema_arg(tool_id, name):
+    schema = get_command_tool(tool_id).to_schema()
     return next(arg for arg in schema["args"] if arg["name"] == name)
 
 

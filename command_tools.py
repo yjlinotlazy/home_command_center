@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime as dt
 import re
 import subprocess
 import sys
@@ -149,6 +150,36 @@ COMMAND_TOOLS: dict[str, CommandTool] = {
                 flag="--output-dir",
                 help="workbook_go 会在这个目录里按默认文件名保存 PDF。",
                 max_length=500,
+            ),
+        ),
+    ),
+    "daka": CommandTool(
+        id="daka",
+        name="新年愿望打卡",
+        description="按日期给已有的愿望和任务打卡。",
+        script=ROOT / "cli_tools" / "daka_checkin.py",
+        tags=("tools", "tracker", "daka"),
+        args=(
+            ToolArg(
+                name="date",
+                label="日期",
+                flag="--date",
+                kind="date",
+                default=dt.date.today().isoformat(),
+                help="默认是今天。",
+                max_length=10,
+            ),
+            ToolArg(
+                name="resolution",
+                label="类别",
+                flag="--resolution",
+                max_length=80,
+            ),
+            ToolArg(
+                name="item",
+                label="子类别",
+                flag="--item",
+                max_length=120,
             ),
         ),
     ),
@@ -322,6 +353,8 @@ def _output_root_for_payload(payload: dict[str, Any]) -> Path:
 
 
 def _arg_default(tool_id: str | None, arg: ToolArg) -> str:
+    if tool_id == "daka" and arg.name == "date":
+        return dt.date.today().isoformat()
     if tool_id == "chinese-practice" and arg.name == "output_dir":
         return str(chinese_chars_output_dir())
     return arg.default

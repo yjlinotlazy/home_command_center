@@ -145,6 +145,23 @@ Done when:
 - [x] User can choose recipe CSV path
 - [x] Interactive recipe editing/picking is left out of scope
 
+## Milestone 10: Daka Tool
+
+Status: Done
+
+Goal: Expose the new year resolution tracker as a one-click check-in page.
+
+Done when:
+
+- [x] `daka` appears as a command tool
+- [x] The tool page loads all resolutions and tasks at once
+- [x] The tool page includes a date picker defaulted to today
+- [x] Each task has its own one-click check-in button
+- [x] The tool page can generate task-level and resolution-level reports
+- [x] Reports keep the resolution color categories and show web-friendly progress bars
+- [x] Rename/add flows stay in the original CLI
+- [x] The backend records check-ins through the existing `daka` data files
+
 ## Later
 
 Ideas deliberately outside the first release:

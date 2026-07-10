@@ -13,13 +13,14 @@ from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import unquote, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 from urllib.request import Request, urlopen
 
 import yaml
 
 from command_tools import ToolError, get_command_tool, list_command_tools, run_command_tool
 from app_settings import chinese_chars_output_dir
+from daka_bridge import DakaToolError, generate_report, load_state
 
 
 ROOT = Path(__file__).resolve().parent
@@ -230,9 +231,20 @@ class Handler(BaseHTTPRequestHandler):
         if path.startswith("/api/tools/"):
             tool_id = path.removeprefix("/api/tools/").strip("/")
             try:
-                self._send_json(get_command_tool(tool_id).to_schema())
+                if tool_id == "daka":
+                    query = parse_qs(parsed.query)
+                    date_text = query.get("date", [None])[0]
+                    report_kind = query.get("report", [None])[0]
+                    if report_kind:
+                        self._send_json(generate_report(report_kind, date_text))
+                    else:
+                        self._send_json(load_state(date_text))
+                else:
+                    self._send_json(get_command_tool(tool_id).to_schema())
             except ToolError as exc:
                 self._send_json({"error": str(exc)}, status=404)
+            except DakaToolError as exc:
+                self._send_json({"error": str(exc)}, status=400)
             return
 
         if path.startswith("/static/"):
@@ -425,7 +437,9 @@ def render_tool_page(tool_id: str, tool_name: str) -> str:
       <button class="open tool-submit" type="submit" data-tool-submit>生成</button>
     </form>
 
+    <section class="notice" data-tool-status hidden></section>
     <section class="notice" data-tool-error hidden></section>
+    <section class="tool-daka" data-tool-daka hidden></section>
     <section class="generated-files" data-tool-files></section>
     <pre class="tool-output" data-tool-output></pre>
   </main>

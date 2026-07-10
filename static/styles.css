@@ -347,6 +347,235 @@ small {
   margin-bottom: 16px;
 }
 
+.tool-status {
+  border-color: color-mix(in srgb, var(--ok), white 68%);
+  background: color-mix(in srgb, var(--ok), white 90%);
+  color: var(--ok);
+}
+
+.tool-daka {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.daka-controls {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 12px;
+  align-items: end;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.daka-bottom {
+  display: grid;
+  gap: 12px;
+}
+
+.daka-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.daka-action {
+  border: 0;
+  min-height: 42px;
+  padding: 0 14px;
+  cursor: pointer;
+}
+
+.daka-report-status {
+  margin-bottom: 0;
+}
+
+.daka-report {
+  display: grid;
+  gap: 12px;
+}
+
+.daka-report-title {
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.daka-report-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.daka-report-card {
+  --report-accent: var(--accent);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 12px;
+  border-left: 6px solid var(--report-accent);
+}
+
+.daka-report-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 12px;
+}
+
+.daka-report-label {
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.daka-report-sub {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.daka-report-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.daka-report-badge {
+  border: 1px solid color-mix(in srgb, var(--report-accent), white 58%);
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: var(--report-accent);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.daka-report-bars {
+  display: grid;
+  gap: 8px;
+}
+
+.daka-report-barline {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.daka-progress {
+  height: 10px;
+  border-radius: 999px;
+  background: #e5e8e1;
+  overflow: hidden;
+}
+
+.daka-progress span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--report-accent);
+}
+
+.daka-progress-week span {
+  background: color-mix(in srgb, var(--report-accent), white 15%);
+}
+
+.daka-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.daka-resolution {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 12px;
+}
+
+.daka-resolution-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.daka-resolution-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.daka-resolution-count {
+  color: var(--muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.daka-items {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.daka-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fafaf7;
+}
+
+.daka-item.is-checked {
+  border-color: color-mix(in srgb, var(--ok), white 74%);
+  background: color-mix(in srgb, var(--ok), white 92%);
+}
+
+.daka-item-label {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.daka-item-name {
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.daka-item-meta {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.daka-item-button {
+  flex: 0 0 auto;
+  min-height: 38px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #ffffff;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.daka-item-button:disabled {
+  cursor: default;
+  background: #98aca8;
+}
+
 @media (max-width: 720px) {
   .shell {
     width: min(100% - 20px, 1120px);
@@ -367,6 +596,22 @@ small {
   }
 
   .tool-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .daka-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .daka-report-head {
+    display: grid;
+  }
+
+  .daka-report-badges {
+    justify-content: flex-start;
+  }
+
+  .daka-items {
     grid-template-columns: 1fr;
   }
 

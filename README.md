@@ -105,8 +105,11 @@ Current tool:
 
 * `chinese-practice`: generates printable Chinese handwriting practice PDFs using the workbook generator from `/home/yli/e/Dropbox/github/workbook_go`
 * `eat-what`: generates a weekly menu or lists recipes using `/home/yli/e/Dropbox/github/eat_what`
+* `daka`: shows all existing new year resolutions and tasks from `/home/yli/e/Dropbox/github/new_year_resolution_tracker` and lets you check them off one by one by date
 
 `eat-what` currently exposes the non-interactive planner and recipe-list modes. The interactive `eat-what-recipe` and `eat-what-pick` commands are not wrapped yet.
+
+`daka` is web-first: the page loads the full resolution tree, includes a date picker defaulted to today, each task gets its own check-in button, and the page can generate task or resolution reports. Rename/add flows stay in the original CLI.
 
 To add a command tool:
 

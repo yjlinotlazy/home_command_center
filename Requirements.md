@@ -59,6 +59,13 @@ Command tool cards should show:
 
 Clicking a command tool opens a web form for that tool.
 
+The `daka` tool is a special case:
+
+* It loads the full resolution/task tree at once
+* It shows a date picker defaulted to today
+* Each task has its own one-click check-in button
+* Rename and add flows stay outside the web UI
+
 ## App Configuration
 
 Each app is configured by the user in `~/.config/home_command_center/apps/*.yaml`.
@@ -189,6 +196,19 @@ It should support:
 * Time, overlap, veg, spicy, and seed options
 
 It should not wrap the interactive `eat-what-recipe` or `eat-what-pick` flows until those have dedicated web form designs.
+
+### New Year Resolution Tool
+
+The `daka` tool wraps `/home/yli/e/Dropbox/github/new_year_resolution_tracker`.
+
+It should:
+
+* Render all resolutions and tasks on one page
+* Let the user choose a date from a calendar input, defaulting to today
+* Let the user check in any task with a single button click
+* Generate both task-level and resolution-level reports
+* Show report colors, labels, and progress in a web-friendly way
+* Keep rename/add flows in the original CLI, not in the web UI
 
 ## Opening Apps
 
