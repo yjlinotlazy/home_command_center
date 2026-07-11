@@ -49,6 +49,16 @@ const t = i18n.t;
 let lastOutputText = "";
 let currentDakaDate = "";
 let currentDakaReport = "";
+const DAKA_PALETTES = [
+  "#f7eef7",
+  "#eef6fb",
+  "#f4f7ea",
+  "#fbf3ea",
+  "#eef7f2",
+  "#f2f1fb",
+  "#fff0f2",
+  "#eef8f8",
+];
 
 const REPORT_COLORS = [
   "#d44f4f",
@@ -196,6 +206,15 @@ function colorForResolution(colorValue, index) {
 function cssColorForResolution(colorValue, index) {
   if (ANSI_COLOR_MAP[colorValue]) return ANSI_COLOR_MAP[colorValue];
   return colorForResolution(colorValue, index);
+}
+
+function pastelForName(name, index) {
+  if (!name) return DAKA_PALETTES[index % DAKA_PALETTES.length];
+  let hash = 0;
+  for (let i = 0; i < name.length; i += 1) {
+    hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  }
+  return DAKA_PALETTES[hash % DAKA_PALETTES.length];
 }
 
 function fieldHtml(arg) {
@@ -405,9 +424,11 @@ function renderDakaTool(payload) {
     return;
   }
 
-  for (const resolution of payload.resolutions) {
+  payload.resolutions.forEach((resolution, index) => {
+    const accent = pastelForName(resolution.name, index);
     const section = document.createElement("section");
     section.className = "daka-resolution";
+    section.style.setProperty("--daka-accent", accent);
 
     const header = document.createElement("div");
     header.className = "daka-resolution-head";
@@ -461,7 +482,7 @@ function renderDakaTool(payload) {
 
     section.append(header, items);
     grid.append(section);
-  }
+  });
 }
 
 async function loadDakaReport(reportKind, reportPane, reportStatus, announce = true) {
@@ -501,10 +522,11 @@ function renderDakaReport(payload, reportPane) {
   const rows = payload.groups
     .map((group, index) => {
       const accent = cssColorForResolution(group.color, index);
+      const bg = pastelForName(group.resolution || group.item || "", index);
       const label = payload.report_kind === "summary" ? `${group.resolution} / ${group.item}` : group.resolution;
       const subtitle = payload.report_kind === "summary" ? t("task_level") : t("resolution_level");
       return `
-        <article class="daka-report-card" style="--report-accent:${accent}">
+        <article class="daka-report-card" style="--report-accent:${accent}; --report-bg:${bg}">
           <div class="daka-report-head">
             <div>
               <div class="daka-report-label">${escapeHtml(label)}</div>

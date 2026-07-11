@@ -214,11 +214,11 @@ COMMAND_TOOLS: dict[str, CommandTool] = {
     ),
     "daka": CommandTool(
         id="daka",
-        name="新年愿望打卡",
-        description="按日期给已有的愿望和任务打卡。",
+        name="随缘打卡",
+        description="按日期给已有的愿望和任务随缘打卡。",
         script=ROOT / "cli_tools" / "daka_checkin.py",
         tags=("tools", "tracker", "daka"),
-        name_en="New Year Check-in",
+        name_en="Casual Check-in",
         description_en="Check off existing resolutions and tasks by date.",
         args=(
             ToolArg(

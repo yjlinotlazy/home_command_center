@@ -137,8 +137,8 @@ def load_state(date_text: str | None = None) -> dict[str, Any]:
     return {
         "kind": "daka",
         "id": "daka",
-        "name": "新年愿望打卡",
-        "description": "按日期给已有的愿望和任务打卡。",
+        "name": "随缘打卡",
+        "description": "按日期给已有的愿望和任务随缘打卡。",
         "date": date_str,
         "resolutions": [_resolution_payload(resolution, date_str) for resolution in data.get("resolutions", [])],
     }

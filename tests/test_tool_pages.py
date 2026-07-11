@@ -6,7 +6,7 @@ from cli_tools import chinese_practice, daka_checkin, eat_what
 class ToolPageTest(unittest.TestCase):
     def test_each_tool_renders_its_own_page_shell(self):
         cases = [
-            (daka_checkin.render_tool_page(), "daka", "新年愿望打卡"),
+            (daka_checkin.render_tool_page(), "daka", "随缘打卡"),
             (eat_what.render_tool_page(), "eat-what", "吃啥"),
         ]
 

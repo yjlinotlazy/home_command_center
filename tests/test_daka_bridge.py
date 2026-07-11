@@ -25,6 +25,7 @@ class DakaBridgeTest(unittest.TestCase):
             state = daka_bridge.load_state("2026-07-10")
 
         self.assertEqual(state["kind"], "daka")
+        self.assertEqual(state["name"], "随缘打卡")
         self.assertEqual(state["date"], "2026-07-10")
         self.assertTrue(state["resolutions"][0]["items"][0]["checked"])
         self.assertFalse(state["resolutions"][0]["items"][1]["checked"])

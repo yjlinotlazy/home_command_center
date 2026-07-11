@@ -484,7 +484,7 @@ small {
   --report-accent: var(--accent);
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--panel);
+  background: var(--report-bg, var(--panel));
   padding: 12px;
   border-left: 6px solid var(--report-accent);
 }
@@ -564,7 +564,8 @@ small {
 .daka-resolution {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--panel);
+  border-left: 6px solid var(--daka-accent, var(--line));
+  background: color-mix(in srgb, var(--daka-accent, var(--panel)), white 92%);
   padding: 12px;
 }
 
@@ -603,7 +604,7 @@ small {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 10px 12px;
-  background: #fafaf7;
+  background: color-mix(in srgb, var(--daka-accent, var(--panel)), white 96%);
 }
 
 .daka-item-row {
@@ -615,11 +616,6 @@ small {
 
 .daka-item-row:disabled {
   cursor: default;
-}
-
-.daka-item.is-checked {
-  border-color: color-mix(in srgb, var(--ok), white 74%);
-  background: color-mix(in srgb, var(--ok), white 92%);
 }
 
 .daka-item-label {
@@ -648,11 +644,6 @@ small {
   color: var(--accent);
   font-size: calc(0.78rem + 6px);
   white-space: nowrap;
-}
-
-.daka-item.is-checked .daka-item-badge {
-  border-color: color-mix(in srgb, var(--ok), white 58%);
-  color: var(--ok);
 }
 
 @media (max-width: 720px) {
