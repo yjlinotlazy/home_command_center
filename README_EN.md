@@ -66,7 +66,6 @@ Create one YAML file per app in `~/.config/home_command_center/apps/`.
 id: inspire
 name: Inspire
 url: "https://192.168.0.0:8001"
-thumbnail: ./thumb.png
 description: Inspiration browser
 tags:
   - writing
@@ -82,13 +81,14 @@ Required fields:
 
 Optional fields:
 
-* `thumbnail`
 * `description`
 * `tags`
 * `health_url`
 * `health_verify_tls`
 
-`thumbnail` paths are resolved relative to the YAML file.
+Put each app cover beside its YAML file with the same basename, for example
+`inspire.png` for `inspire.yaml`. The legacy `thumbnail` field remains supported
+and is used when the matching PNG does not exist.
 
 `health_url` is only used to extract the host and port to probe. Home Command Center checks whether that port is listening; it does not make an HTTP request. Use the local backend port here, not the public Caddy port.
 

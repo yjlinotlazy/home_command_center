@@ -1,9 +1,9 @@
 const state = {
   apps: [],
-  tags: [],
-  search: "",
-  tag: "",
-  status: "",
+  // tags: [],
+  // search: "",
+  // tag: "",
+  // status: "",
 };
 const i18n = window.__HCC_I18N || {
   currentLang: () => (window.__HCC_LANG__ === "en" ? "en" : "zh"),
@@ -27,9 +27,9 @@ const els = {
   count: document.querySelector("[data-count]"),
   empty: document.querySelector("[data-empty]"),
   error: document.querySelector("[data-error]"),
-  search: document.querySelector("[data-search]"),
-  tag: document.querySelector("[data-tag]"),
-  status: document.querySelector("[data-status]"),
+  // search: document.querySelector("[data-search]"),
+  // tag: document.querySelector("[data-tag]"),
+  // status: document.querySelector("[data-status]"),
 };
 
 function statusLabel(status) {
@@ -48,10 +48,12 @@ function initials(name) {
     .toUpperCase();
 }
 
+/* Keyword pills are disabled for the current version.
 function renderTags(tags) {
   if (!tags.length) return "";
   return `<div class="tags">${tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>`;
 }
+*/
 
 function escapeHtml(value) {
   return String(value)
@@ -64,48 +66,53 @@ function escapeHtml(value) {
 
 function renderApp(app) {
   const media = app.thumbnail
-    ? `<img class="thumb" src="${escapeHtml(app.thumbnail)}" alt="">`
+    ? `<div class="thumb-frame"><img class="thumb" src="${escapeHtml(app.thumbnail)}" alt=""></div>`
     : `<div class="fallback" aria-hidden="true">${escapeHtml(initials(app.name))}</div>`;
   const actionLabel = app.kind === "command" ? t("use") : t("open");
 
-  return `<a class="card" data-card href="${escapeHtml(app.url)}" target="_blank" rel="noopener noreferrer">
+  return `<a class="card" data-card href="${escapeHtml(app.url)}">
     ${media}
     <div class="body">
       <div class="card-head">
         <div>
           <h2 class="name">${escapeHtml(app.name)}</h2>
-          <span class="host">${escapeHtml(app.hostname)}</span>
+          ${app.hostname ? `<span class="host">${escapeHtml(app.hostname)}</span>` : ""}
         </div>
         <span class="status ${escapeHtml(app.status)}">${statusLabel(app.status)}</span>
       </div>
       <div class="description">${escapeHtml(app.description || t("no_description"))}</div>
-      ${renderTags(app.tags)}
+      <!-- Keyword pills are disabled for the current version. -->
       <span class="open card-action">${actionLabel}</span>
     </div>
   </a>`;
 }
 
+/* Filters are disabled for the current version.
 function filteredApps() {
   const query = state.search.trim().toLowerCase();
   return state.apps.filter((app) => {
     const matchesSearch =
       !query ||
       [app.name, app.hostname, app.description, app.url].some((value) =>
-        String(value || "").toLowerCase().includes(query),
+        String(value || "")
+          .toLowerCase()
+          .includes(query),
       );
     const matchesTag = !state.tag || app.tags.includes(state.tag);
     const matchesStatus = !state.status || app.status === state.status;
     return matchesSearch && matchesTag && matchesStatus;
   });
 }
+*/
 
 function render() {
-  const apps = filteredApps();
+  const apps = state.apps;
   els.apps.innerHTML = apps.map(renderApp).join("");
   els.count.textContent = t("count_apps", apps.length);
   els.empty.hidden = apps.length !== 0;
 }
 
+/* Filters are disabled for the current version.
 function renderTagOptions() {
   for (const tag of state.tags) {
     const option = document.createElement("option");
@@ -114,6 +121,7 @@ function renderTagOptions() {
     els.tag.append(option);
   }
 }
+*/
 
 async function loadApps() {
   try {
@@ -124,8 +132,8 @@ async function loadApps() {
     if (!response.ok) throw new Error(payload.error || t("load_apps_error"));
 
     state.apps = payload.apps;
-    state.tags = payload.tags;
-    renderTagOptions();
+    // state.tags = payload.tags;
+    // renderTagOptions();
     render();
   } catch (error) {
     els.error.hidden = false;
@@ -133,6 +141,7 @@ async function loadApps() {
   }
 }
 
+/* Filters are disabled for the current version.
 els.search.addEventListener("input", (event) => {
   state.search = event.target.value;
   render();
@@ -147,5 +156,6 @@ els.status.addEventListener("change", (event) => {
   state.status = event.target.value;
   render();
 });
+*/
 
 loadApps();

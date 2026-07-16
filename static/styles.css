@@ -151,7 +151,7 @@ select {
   border-color: color-mix(in srgb, var(--accent), white 66%);
 }
 
-.thumb,
+.thumb-frame,
 .fallback {
   width: 100%;
   aspect-ratio: 16 / 8;
@@ -163,8 +163,18 @@ select {
   font-weight: 760;
 }
 
+.thumb-frame {
+  overflow: hidden;
+  background: #fff;
+}
+
 .thumb {
-  object-fit: cover;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  clip-path: inset(3px);
 }
 
 .body {
@@ -200,7 +210,7 @@ select {
   border: 1px solid var(--line);
   padding: 4px 8px;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 1rem;
   text-transform: capitalize;
 }
 
@@ -458,6 +468,7 @@ small {
   min-height: 42px;
   padding: 0 14px;
   cursor: pointer;
+  font-size: 20px;
 }
 
 .daka-report-status {
@@ -604,7 +615,7 @@ small {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 10px 12px;
-  background: color-mix(in srgb, var(--daka-accent, var(--panel)), white 96%);
+  background: var(--daka-accent, var(--panel));
 }
 
 .daka-item-row {

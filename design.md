@@ -50,11 +50,12 @@ Configured web apps are shown as dashboard cards.
 
 Each card shows:
 
-1. Name
-2. URL/hostname
-3. Description
-4. Tags
-5. Status, when health checks are configured
+1. Cover image from `~/.config/home_command_center/apps/<appname>.png`
+2. Name
+3. URL/hostname
+4. Description
+5. Tags
+6. Status, when health checks are configured
 
 Clicking the card is sufficient to open the app.
 

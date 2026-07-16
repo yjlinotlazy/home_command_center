@@ -24,6 +24,10 @@
   font-size: calc(1rem + 5px);
 }
 
+.tool-panel--practice small {
+  font-size: 18px;
+}
+
 @media (max-width: 720px) {
   .tool-fields--practice {
     grid-template-columns: 1fr;

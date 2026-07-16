@@ -65,6 +65,36 @@ health_verify_tls: false
 
             self.assertEqual(AppRegistry(apps_dir).load(), [])
 
+    def test_uses_png_matching_yaml_stem_as_cover(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            apps_dir = Path(tmp)
+            (apps_dir / "demo.yaml").write_text(
+                'id: demo\nname: Demo\nurl: "https://example.test"\n',
+                encoding="utf-8",
+            )
+            cover = apps_dir / "demo.png"
+            cover.write_bytes(b"png")
+
+            registry = AppRegistry(apps_dir)
+            app = registry.load()[0]
+
+            self.assertEqual(app.to_dict()["thumbnail"], "/thumb/demo")
+            self.assertEqual(registry.thumbnail_path("demo"), cover.resolve())
+
+    def test_command_tool_cover_uses_registered_app_name(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            apps_dir = Path(tmp)
+            cover = apps_dir / "eat_what.png"
+            cover.write_bytes(b"png")
+
+            registry = AppRegistry(apps_dir)
+
+            self.assertEqual(registry.thumbnail_path("tool:eat-what"), cover.resolve())
+            payload = next(
+                app for app in registry.app_payload()["apps"] if app["id"] == "tool:eat-what"
+            )
+            self.assertEqual(payload["thumbnail"], "/thumb/tool:eat-what")
+
 
 if __name__ == "__main__":
     unittest.main()

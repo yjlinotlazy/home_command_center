@@ -71,7 +71,7 @@ def main() -> None:
     lang = normalize_lang(os.environ.get("HCC_LANG"))
     parser = argparse.ArgumentParser(description="Generate a Chinese practice PDF.")
     parser.add_argument("--chars", required=True)
-    parser.add_argument("--density", type=int, default=5)
+    parser.add_argument("--density", type=int, default=10)
     parser.add_argument("--paper", choices=("us_letter", "a4"), default="us_letter")
     parser.add_argument("--mode", type=int, choices=(1, 2, 3), default=1)
     parser.add_argument("--copies", type=int, choices=range(1, 6), default=2)

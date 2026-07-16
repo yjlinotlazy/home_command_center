@@ -89,6 +89,7 @@ class CommandTool:
     tags: tuple[str, ...] = ("tools",)
     name_en: str = ""
     description_en: str = ""
+    cover_image: str = ""
 
     def name_for(self, lang: str | None = None) -> str:
         if normalize_lang(lang) == "en" and self.name_en:
@@ -100,15 +101,15 @@ class CommandTool:
             return self.description_en
         return self.description
 
-    def to_app_dict(self, lang: str | None = None) -> dict[str, Any]:
+    def to_app_dict(self, lang: str | None = None, thumbnail: str | None = None) -> dict[str, Any]:
         return {
             "id": f"tool:{self.id}",
             "name": self.name_for(lang),
             "name_zh": self.name,
             "name_en": self.name_en,
             "url": f"/tools/{self.id}",
-            "hostname": tr(lang, "command_tool"),
-            "thumbnail": None,
+            "hostname": "",
+            "thumbnail": thumbnail,
             "description": self.description_for(lang),
             "description_zh": self.description,
             "description_en": self.description_en,
@@ -141,6 +142,7 @@ COMMAND_TOOLS: dict[str, CommandTool] = {
         tags=("tools", "pdf", "chinese"),
         name_en="Chinese Practice Sheets",
         description_en="Generate printable Chinese handwriting practice PDFs.",
+        cover_image="workbook_go",
         args=(
             ToolArg(
                 name="chars",
@@ -160,11 +162,11 @@ COMMAND_TOOLS: dict[str, CommandTool] = {
                 label_en="Cells per row",
                 flag="--density",
                 kind="number",
-                default="5",
+                default="10",
                 help="数字越小，格子越大。",
                 help_en="Smaller numbers make larger practice cells.",
-                choices=("3", "4", "5", "6", "7", "8"),
-                max_length=1,
+                choices=("3", "4", "5", "6", "7", "8", "9", "10"),
+                max_length=2,
                 value_type="integer",
             ),
             ToolArg(
@@ -220,6 +222,7 @@ COMMAND_TOOLS: dict[str, CommandTool] = {
         tags=("tools", "tracker", "daka"),
         name_en="Casual Check-in",
         description_en="Check off existing resolutions and tasks by date.",
+        cover_image="daka_tracker",
         args=(
             ToolArg(
                 name="date",
@@ -256,6 +259,7 @@ COMMAND_TOOLS: dict[str, CommandTool] = {
         tags=("tools", "food", "menu"),
         name_en="What to Eat",
         description_en="Generate weekly menus and shopping lists, or list all recipes.",
+        cover_image="eat_what",
         args=(
             ToolArg(
                 name="action",

@@ -51,7 +51,29 @@ class AppConfig:
     @property
     def hostname(self) -> str:
         parsed = urlparse(self.url)
-        return parsed.netloc or self.url
+        if parsed.port is not None:
+            return str(parsed.port)
+        if parsed.scheme == "https":
+            return "443"
+        if parsed.scheme == "http":
+            return "80"
+        return ""
+
+    def thumbnail_path(self) -> Path | None:
+        cover = self.source.with_suffix(".png")
+        if cover.is_file():
+            return cover.resolve()
+
+        if not self.thumbnail:
+            return None
+        path = Path(self.thumbnail)
+        if not path.is_absolute():
+            path = self.source.parent / path
+        try:
+            resolved = path.resolve()
+        except OSError:
+            return None
+        return resolved if resolved.is_file() else None
 
     def to_dict(self, status: str = "unknown") -> dict[str, Any]:
         return {
@@ -59,7 +81,7 @@ class AppConfig:
             "name": self.name,
             "url": self.url,
             "hostname": self.hostname,
-            "thumbnail": f"/thumb/{self.id}" if self.thumbnail else None,
+            "thumbnail": f"/thumb/{self.id}" if self.thumbnail_path() else None,
             "description": self.description,
             "tags": list(self.tags),
             "health_url": self.health_url,
@@ -148,13 +170,17 @@ class AppRegistry:
         apps = self.load()
         statuses = {app.id: self.health_status(app) for app in apps}
         command_tools = list_command_tools()
+        tool_payloads = []
+        for tool in command_tools:
+            tool_id = f"tool:{tool.id}"
+            thumbnail = f"/thumb/{tool_id}" if self.thumbnail_path(tool_id) else None
+            tool_payloads.append(tool.to_app_dict(lang, thumbnail))
         all_tags = sorted(
             {tag for app in apps for tag in app.tags} | {tag for tool in command_tools for tag in tool.tags},
             key=str.lower,
         )
         return {
-            "apps": [app.to_dict(statuses[app.id]) for app in apps]
-            + [tool.to_app_dict(lang) for tool in command_tools],
+            "apps": [app.to_dict(statuses[app.id]) for app in apps] + tool_payloads,
             "tags": all_tags,
         }
 
@@ -183,21 +209,19 @@ class AppRegistry:
         return status
 
     def thumbnail_path(self, app_id: str) -> Path | None:
+        if app_id.startswith("tool:"):
+            try:
+                tool = get_command_tool(app_id.removeprefix("tool:"))
+            except ToolError:
+                return None
+            if not tool.cover_image:
+                return None
+            cover = self.apps_dir / f"{tool.cover_image}.png"
+            return cover.resolve() if cover.is_file() else None
+
         apps = {app.id: app for app in self.load()}
         app = apps.get(app_id)
-        if not app or not app.thumbnail:
-            return None
-
-        path = Path(app.thumbnail)
-        if not path.is_absolute():
-            path = app.source.parent / path
-
-        try:
-            resolved = path.resolve()
-        except OSError:
-            return None
-
-        return resolved if resolved.is_file() else None
+        return app.thumbnail_path() if app else None
 
 
 REGISTRY = AppRegistry(DEFAULT_APPS_DIR)
@@ -405,6 +429,7 @@ def render_dashboard(lang: str = "zh") -> str:
       <div class="count" data-count>{html.escape(tr(resolved_lang, "count_apps", count=0))}</div>
     </header>
 
+    <!-- Filters are disabled for the current version.
     <section class="toolbar" aria-label="{html.escape(tr(resolved_lang, 'filters'))}">
       <label class="search">
         <span>{html.escape(tr(resolved_lang, "search"))}</span>
@@ -426,6 +451,7 @@ def render_dashboard(lang: str = "zh") -> str:
         </select>
       </label>
     </section>
+    -->
 
     <section class="notice" data-error hidden></section>
     <section class="grid" data-apps></section>

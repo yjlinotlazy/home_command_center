@@ -76,7 +76,6 @@ Example:
 id: inspire
 name: Inspire
 url: "https://192.168.0.0:8001"
-thumbnail: ./thumb.png
 description: Inspiration browser
 tags:
   - writing
@@ -96,7 +95,6 @@ url: "https://192.168.0.0:8001"
 ### Optional Fields
 
 ```yaml
-thumbnail: ./thumb.png
 description: Inspiration browser
 tags:
   - writing
@@ -110,7 +108,8 @@ health_verify_tls: false
 * `id` is a stable unique identifier used by 家用命令台.
 * `name` is the user-facing display name.
 * `url` is the URL opened by household devices.
-* `thumbnail` is resolved relative to the YAML file unless absolute.
+* An app cover is a PNG beside its YAML file with the same basename.
+* The legacy `thumbnail` field is resolved relative to the YAML file unless absolute, and is used only when the matching PNG does not exist.
 * `health_url` is used by 家用命令台 only to extract the host and port to probe. It may be different from `url` and should point at the local backend port.
 * Health checks are TCP port checks, not HTTP requests.
 * `health_verify_tls` is retained for config compatibility, but it is ignored by the current port-based health check.

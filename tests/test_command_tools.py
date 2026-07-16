@@ -136,6 +136,13 @@ class CommandToolsTest(unittest.TestCase):
     def test_schema_can_render_in_english(self):
         self.assertEqual(_schema_arg("chinese-practice", "output_dir", lang="en")["label"], "Output directory")
 
+    def test_chinese_practice_defaults_to_ten_cells_per_row(self):
+        density = _schema_arg("chinese-practice", "density")
+
+        self.assertEqual(density["default"], "10")
+        self.assertEqual(density["max_length"], 2)
+        self.assertIn("10", density["choices"])
+
 
 def _schema_arg(tool_id, name, lang=None):
     schema = get_command_tool(tool_id).to_schema(lang)
