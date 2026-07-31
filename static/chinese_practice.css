@@ -37,4 +37,8 @@
   .tool-submit-row {
     grid-column: auto;
   }
+
+  .tool-fields--practice > .tool-submit-row {
+    order: -1;
+  }
 }

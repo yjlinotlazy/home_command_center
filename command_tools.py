@@ -351,6 +351,17 @@ COMMAND_TOOLS: dict[str, CommandTool] = {
             ),
         ),
     ),
+    "quick_pic": CommandTool(
+        id="quick_pic",
+        name="素写速食",
+        description="把手机拍摄的线稿清理、裁剪并保存为 PNG。",
+        script=ROOT / "cli_tools" / "quick_pic.py",
+        tags=("tools", "image", "drawing"),
+        name_en="quick_pic",
+        description_en="Clean and crop a phone photo of a drawing, then save it as PNG.",
+        cover_image="quick_pic",
+        args=(),
+    ),
 }
 
 

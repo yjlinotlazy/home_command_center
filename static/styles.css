@@ -660,12 +660,124 @@ small {
 @media (max-width: 720px) {
   .shell {
     width: min(100% - 20px, 1120px);
-    padding-top: 18px;
+    padding: 12px 0 20px;
   }
 
-  .topbar {
-    display: grid;
+  .shell:not(.tool-shell) > .topbar {
+    display: block;
     align-items: start;
+    margin-bottom: 12px;
+  }
+
+  .shell:not(.tool-shell) > .topbar h1 {
+    font-size: 1.75rem;
+    line-height: 1;
+  }
+
+  .shell:not(.tool-shell) > .topbar p {
+    display: none;
+  }
+
+  .shell:not(.tool-shell) > .topbar .lang-switch,
+  .shell:not(.tool-shell) > .topbar .count {
+    display: none;
+  }
+
+  .tool-shell > .topbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 10px;
+    align-items: start;
+    margin-bottom: 12px;
+  }
+
+  .tool-shell > .topbar > div {
+    min-width: 0;
+  }
+
+  .tool-shell > .topbar h1 {
+    font-size: 1.35rem;
+    line-height: 1.15;
+  }
+
+  .tool-shell > .topbar p {
+    display: none;
+  }
+
+  .tool-shell > .topbar .back {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 7px 9px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .tool-shell > .topbar .lang-switch {
+    display: none;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .card {
+    min-height: 0;
+  }
+
+  .thumb-frame,
+  .fallback {
+    height: clamp(88px, 15vh, 120px);
+    aspect-ratio: auto;
+  }
+
+  .thumb {
+    width: auto;
+    height: clamp(68px, 11vh, 84px);
+    max-width: 86%;
+    max-height: none;
+    clip-path: inset(1px);
+  }
+
+  .fallback {
+    font-size: 1.35rem;
+  }
+
+  .body {
+    gap: 0;
+    padding: 8px;
+  }
+
+  .card-head {
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-head > div {
+    min-width: 0;
+  }
+
+  .name {
+    overflow: hidden;
+    font-size: 0.9rem;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .host {
+    margin-top: 2px;
+    font-size: 0.75rem;
+  }
+
+  .status {
+    padding: 2px 5px;
+    font-size: 0.72rem;
+  }
+
+  .description,
+  .card-action {
+    display: none;
   }
 
   .toolbar {
@@ -682,6 +794,43 @@ small {
 
   .daka-controls {
     grid-template-columns: 1fr;
+    min-width: 0;
+  }
+
+  .daka-date-field,
+  .daka-date-field input[type="date"] {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .daka-date-field input[type="date"] {
+    display: block;
+    width: 100%;
+    inline-size: 100%;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 38px;
+    min-height: 38px;
+    padding: 0 8px;
+    line-height: 38px;
+    text-align: center;
+  }
+
+  .daka-date-field input[type="date"]::-webkit-date-and-time-value {
+    display: flex;
+    height: 100%;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    text-align: center;
+  }
+
+  .daka-date-field > span {
+    display: none;
   }
 
   .daka-report-head {

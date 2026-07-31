@@ -19,7 +19,7 @@ import yaml
 from command_tools import ToolError, get_command_tool, list_command_tools, run_command_tool
 from app_settings import chinese_chars_output_dir
 from daka_bridge import DakaToolError, generate_report, load_state
-from cli_tools import chinese_practice, daka_checkin, eat_what
+from cli_tools import chinese_practice, daka_checkin, eat_what, quick_pic
 from asset_urls import asset_url
 from i18n import normalize_lang, tr
 
@@ -229,6 +229,7 @@ TOOL_PAGE_RENDERERS = {
     "chinese-practice": chinese_practice.render_tool_page,
     "daka": daka_checkin.render_tool_page,
     "eat-what": eat_what.render_tool_page,
+    "quick_pic": quick_pic.render_tool_page,
 }
 
 
@@ -263,6 +264,33 @@ class Handler(BaseHTTPRequestHandler):
                 self._send_json(REGISTRY.app_payload(lang))
             except ConfigError as exc:
                 self._send_json({"error": str(exc)}, status=500)
+            return
+
+        if path == "/api/tools/quick_pic/candidates":
+            try:
+                self._send_json(quick_pic.initial_payload(lang))
+            except quick_pic.QuickPicError as exc:
+                self._send_json({"error": str(exc)}, status=500)
+            return
+
+        if path.startswith("/api/tools/quick_pic/source/"):
+            candidate_id = path.removeprefix("/api/tools/quick_pic/source/")
+            try:
+                config = quick_pic.load_config()
+                candidate = quick_pic.get_candidate(config, candidate_id)
+                self._send_file(candidate.path, extra_roots=(config.input_dir,))
+            except quick_pic.QuickPicError as exc:
+                self._send_json({"error": str(exc)}, status=404)
+            return
+
+        if path.startswith("/api/tools/quick_pic/results/"):
+            remainder = path.removeprefix("/api/tools/quick_pic/results/")
+            try:
+                output_dir_id, filename = remainder.split("/", 1)
+                result, output_root = quick_pic.resolve_result(output_dir_id, filename)
+                self._send_file(result, extra_roots=(output_root,))
+            except (ValueError, quick_pic.QuickPicError) as exc:
+                self._send_json({"error": str(exc)}, status=404)
             return
 
         if path.startswith("/api/tools/"):
@@ -312,6 +340,23 @@ class Handler(BaseHTTPRequestHandler):
         path = unquote(parsed.path)
         lang = _request_lang(parsed)
 
+        if path == "/api/tools/quick_pic/preview":
+            try:
+                payload = self._read_json_body()
+                image, _config, _candidate, _background, _threshold = quick_pic.process_request(payload)
+                self._send_bytes(image, "image/png")
+            except (ValueError, quick_pic.QuickPicError) as exc:
+                self._send_json({"error": str(exc)}, status=400)
+            return
+
+        if path == "/api/tools/quick_pic/save":
+            try:
+                payload = self._read_json_body()
+                self._send_json(quick_pic.save_request(payload))
+            except (ValueError, quick_pic.QuickPicError) as exc:
+                self._send_json({"error": str(exc)}, status=400)
+            return
+
         if path.startswith("/api/tools/") and path.endswith("/run"):
             tool_id = path.removeprefix("/api/tools/").removesuffix("/run").strip("/")
             try:
@@ -345,14 +390,27 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
-    def _send_file(self, path: Path) -> None:
+    def _send_bytes(self, data: bytes, content_type: str, status: int = 200) -> None:
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
+    def _send_file(self, path: Path, extra_roots: tuple[Path, ...] = ()) -> None:
         try:
             resolved = path.resolve()
         except OSError:
             self._send_error(404, "File not found")
             return
 
-        allowed_roots = [STATIC_DIR.resolve(), REGISTRY.apps_dir, chinese_chars_output_dir().resolve()]
+        allowed_roots = [
+            STATIC_DIR.resolve(),
+            REGISTRY.apps_dir,
+            chinese_chars_output_dir().resolve(),
+            *(root.resolve() for root in extra_roots),
+        ]
         if not any(resolved == root or root in resolved.parents for root in allowed_roots):
             self._send_error(403, "Forbidden")
             return

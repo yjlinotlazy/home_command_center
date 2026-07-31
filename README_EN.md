@@ -111,10 +111,23 @@ Current tool:
 * `chinese-practice`: generates printable Chinese handwriting practice PDFs using the workbook generator from `<workbook_go_repo>`
 * `eat-what`: generates a weekly menu or lists recipes using `<eat_what_repo>`
 * `daka`: shows all existing new year resolutions and tasks from `<new_year_resolution_tracker_repo>` and lets you check them off one by one by date
+* `quick_pic` (素写速食): cleans the background from a phone photo of line art, crops it, and saves a PNG
 
 `eat-what` currently exposes the non-interactive planner and recipe-list modes. The interactive `eat-what-recipe` and `eat-what-pick` commands are not wrapped yet.
 
 `daka` is web-first: the page loads the full resolution tree, includes a date picker defaulted to today, each task gets its own check-in button, and the page can generate task or resolution reports. Rename/add flows stay in the original CLI.
+
+`quick_pic` uses ImageMagick and reads its input and output roots from the private
+`~/.config/home_command_center/apps/quick_pic.yaml` config. The page shows only the five newest images in the input directory. The output picker includes the configured root and every directory beneath it. Do not commit real machine paths:
+
+```yaml
+type: command_tool
+
+quick_pic:
+  input_dir: "/path/to/private/camera-uploads"
+  output_root: "/path/to/private/image-library"
+  recent_count: 5
+```
 
 To add a command tool:
 

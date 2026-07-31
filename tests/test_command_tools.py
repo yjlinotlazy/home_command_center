@@ -10,7 +10,10 @@ from command_tools import ToolError, get_command_tool, list_command_tools, run_c
 
 class CommandToolsTest(unittest.TestCase):
     def test_tools_are_registered(self):
-        self.assertEqual([tool.id for tool in list_command_tools()], ["eat-what", "chinese-practice", "daka"])
+        self.assertEqual(
+            [tool.id for tool in list_command_tools()],
+            ["eat-what", "chinese-practice", "quick_pic", "daka"],
+        )
 
     def test_rejects_unknown_tool(self):
         with self.assertRaisesRegex(ToolError, "Unknown command tool"):

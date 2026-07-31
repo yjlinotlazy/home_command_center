@@ -101,10 +101,23 @@ health_url: "http://127.0.0.1:7001"
 * `chinese-practice`：使用 `workbook_go` 生成可打印的中文练字 PDF
 * `eat-what`：生成周菜单，或列出食谱
 * `daka`：显示 `new_year_resolution_tracker` 里的所有新年愿望和任务，并支持按日期逐个打卡
+* `quick_pic`（素写速食）：清理手机拍摄的线稿背景，自动裁剪并保存 PNG
 
 `eat-what` 目前只暴露非交互式的 planner 和 recipe-list 模式。交互式的 `eat-what-recipe` 和 `eat-what-pick` 还没有封装。
 
 `daka` 是 web-first：页面会加载完整的愿望树，带一个默认指向今天的日期选择器，每个任务都有自己的打卡按钮，页面还能生成任务或愿望汇总。重命名和新增仍留在原始 CLI 里。
+
+`quick_pic` 使用 ImageMagick，并从私有配置
+`~/.config/home_command_center/apps/quick_pic.yaml` 读取输入和输出根目录。页面只显示输入目录中最新的五张图片；输出可以选择配置的根目录或它下面的任意子目录。真实机器路径不要提交到仓库：
+
+```yaml
+type: command_tool
+
+quick_pic:
+  input_dir: "/path/to/private/camera-uploads"
+  output_root: "/path/to/private/image-library"
+  recent_count: 5
+```
 
 添加命令行工具时：
 
