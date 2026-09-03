@@ -1,0 +1,10 @@
+id: tomato_watch
+name: 番茄钟
+url: "/tools/tomato_watch"
+description: 按项目记录专注时间。
+tags:
+  - time
+  - local
+tomato_watch:
+  projects_csv: /home/yli/Dropbox/Embedded/home_companian/time/projects.csv
+  history_csv: /home/yli/Dropbox/Embedded/home_companian/time/histroy.csv

@@ -19,6 +19,7 @@ import yaml
 from command_tools import ToolError, get_command_tool, list_command_tools, run_command_tool
 from app_settings import chinese_chars_output_dir
 from daka_bridge import DakaToolError, generate_report, load_state
+import tomato_watch
 from cli_tools import chinese_practice, daka_checkin, eat_what, quick_pic
 from asset_urls import asset_url
 from i18n import normalize_lang, tr
@@ -247,6 +248,9 @@ class Handler(BaseHTTPRequestHandler):
 
         if path.startswith("/tools/"):
             tool_id = path.removeprefix("/tools/").strip("/")
+            if tool_id == "tomato_watch":
+                self._send_html(tomato_watch.render_tool_page(lang))
+                return
             try:
                 tool = get_command_tool(tool_id)
             except ToolError as exc:
@@ -296,6 +300,9 @@ class Handler(BaseHTTPRequestHandler):
         if path.startswith("/api/tools/"):
             tool_id = path.removeprefix("/api/tools/").strip("/")
             try:
+                if tool_id == "tomato_watch":
+                    self._send_json(tomato_watch.payload())
+                    return
                 if tool_id == "daka":
                     query = parse_qs(parsed.query)
                     date_text = query.get("date", [None])[0]
@@ -365,6 +372,13 @@ class Handler(BaseHTTPRequestHandler):
             except ToolError as exc:
                 self._send_json({"error": str(exc)}, status=400)
             except ValueError as exc:
+                self._send_json({"error": str(exc)}, status=400)
+            return
+
+        if path == "/api/tools/tomato_watch/action":
+            try:
+                self._send_json(tomato_watch.action(self._read_json_body()))
+            except tomato_watch.TomatoWatchError as exc:
                 self._send_json({"error": str(exc)}, status=400)
             return
 
