@@ -274,6 +274,54 @@ select {
   text-decoration: none;
 }
 
+.monitor-shell { max-width: 1180px; }
+.monitor-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 26px; }
+.metric, .monitor-row { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); padding: 14px; }
+.metric { display: grid; gap: 7px; }
+.metric span, .metric small, .monitor-row small, .monitor-row p { color: var(--muted); }
+.metric strong { font-size: 1.4rem; }
+.monitor-apps h2 { margin: 0 0 12px; }
+.monitor-list { display: grid; gap: 10px; }
+.monitor-row { display: grid; grid-template-columns: 1fr auto; gap: 5px 14px; }
+.monitor-row small { display: block; margin-top: 4px; }
+.monitor-row p { grid-column: 1 / -1; margin: 2px 0 0; font-size: .9rem; }
+@media (max-width: 650px) { .topbar { align-items: start; flex-wrap: wrap; } .monitor-row { grid-template-columns: 1fr; } }
+
+.monitor-page {
+  --bg: #0c1110;
+  --panel: #111a17;
+  --text: #d6e7df;
+  --muted: #789188;
+  --line: #233a32;
+  --accent: #59d18c;
+  --accent-strong: #9af2ba;
+  --ok: #59d18c;
+  --danger: #ff766d;
+  background: var(--bg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.monitor-page .shell { padding-top: 24px; }
+.monitor-page .topbar { align-items: center; margin-bottom: 18px; }
+.monitor-page h1 { color: var(--accent-strong); font-size: clamp(1.55rem, 5vw, 2.5rem); letter-spacing: -0.04em; }
+.monitor-page .prompt { color: var(--accent); }
+.monitor-page p { font-size: .82rem; }
+.monitor-page .back { border-color: var(--line); background: transparent; color: var(--muted); font-size: .78rem; padding: 6px 8px; }
+.monitor-page .count { border-color: var(--line); background: transparent; color: var(--accent); font-size: .78rem; }
+.monitor-page .monitor-summary { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-bottom: 22px; }
+.monitor-page .metric, .monitor-page .monitor-row { border-color: var(--line); border-radius: 3px; background: var(--panel); box-shadow: inset 2px 0 var(--accent); }
+.monitor-page .metric { gap: 5px; padding: 12px; }
+.monitor-page .metric span { color: var(--accent); font-size: .72rem; text-transform: uppercase; }
+.monitor-page .metric strong { color: var(--text); font-size: 1.15rem; }
+.monitor-page .metric small, .monitor-page .monitor-row small, .monitor-page .monitor-row p { font-size: .73rem; }
+.monitor-page .monitor-apps h2 { color: var(--accent); font-size: .85rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; }
+.monitor-page .monitor-list { gap: 6px; }
+.monitor-page .monitor-row { grid-template-columns: 1fr auto; gap: 3px 12px; padding: 10px 12px; }
+.monitor-page .monitor-row strong { font-size: .88rem; font-weight: 600; }
+.monitor-page .monitor-row .status { border-radius: 2px; padding: 2px 6px; font-size: .7rem; }
+.monitor-page .monitor-row p { margin: 2px 0 0; }
+.monitor-page .notice { border-color: #633b37; border-radius: 3px; background: #241513; color: #ffaaa3; font-size: .8rem; }
+
 .tool-shell {
   width: min(1360px, calc(100% - 24px));
   max-width: none;

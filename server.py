@@ -23,6 +23,7 @@ import tomato_watch
 from cli_tools import chinese_practice, daka_checkin, eat_what, quick_pic
 from asset_urls import asset_url
 from i18n import normalize_lang, tr
+import server_monitor
 
 
 ROOT = Path(__file__).resolve().parent
@@ -181,7 +182,21 @@ class AppRegistry:
             key=str.lower,
         )
         return {
-            "apps": [app.to_dict(statuses[app.id]) for app in apps] + tool_payloads,
+            "apps": [app.to_dict(statuses[app.id]) for app in apps] + tool_payloads + [
+                {
+                    "id": "system-monitor",
+                    "name": tr(lang, "server_monitor"),
+                    "url": "/monitor",
+                    "hostname": "",
+                    "thumbnail": None,
+                    "description": tr(lang, "monitor_subtitle"),
+                    "tags": ["system"],
+                    "health_url": None,
+                    "health_verify_tls": True,
+                    "status": "online",
+                    "kind": "monitor",
+                }
+            ],
             "tags": all_tags,
         }
 
@@ -246,6 +261,10 @@ class Handler(BaseHTTPRequestHandler):
             self._send_html(render_dashboard(lang))
             return
 
+        if path == "/monitor":
+            self._send_html(render_monitor(lang))
+            return
+
         if path.startswith("/tools/"):
             tool_id = path.removeprefix("/tools/").strip("/")
             if tool_id == "tomato_watch":
@@ -266,6 +285,15 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/apps":
             try:
                 self._send_json(REGISTRY.app_payload(lang))
+            except ConfigError as exc:
+                self._send_json({"error": str(exc)}, status=500)
+            return
+
+        if path == "/api/monitor":
+            try:
+                apps = [app for app in REGISTRY.app_payload(lang)["apps"] if app["id"] != "system-monitor"]
+                tools = [{"id": tool.id, "name": tool.name_for(lang)} for tool in list_command_tools()]
+                self._send_json(server_monitor.collect(apps, tools))
             except ConfigError as exc:
                 self._send_json({"error": str(exc)}, status=500)
             return
@@ -532,6 +560,19 @@ def render_dashboard(lang: str = "zh") -> str:
 </body>
 </html>
 """
+
+
+def render_monitor(lang: str = "zh") -> str:
+    resolved_lang = normalize_lang(lang)
+    title = tr(resolved_lang, "server_monitor")
+    return f"""<!doctype html>
+<html lang="{'en' if resolved_lang == 'en' else 'zh-CN'}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{html.escape(title)}</title><link rel="stylesheet" href="{asset_url('/static/styles.css')}">
+<script>window.__HCC_LANG__ = {json.dumps(resolved_lang)};</script>
+<script src="{asset_url('/static/i18n.js')}" defer></script><script src="{asset_url('/static/monitor.js')}" defer></script></head>
+<body class="monitor-page"><main class="shell monitor-shell"><header class="topbar"><div><a class="back" href="/">{html.escape(tr(resolved_lang, 'back_to_dashboard'))}</a><h1><span class="prompt">$</span> {html.escape(title)}</h1><p>{html.escape(tr(resolved_lang, 'monitor_subtitle'))}</p></div><div class="count" data-monitor-updated>—</div></header>
+<section class="notice" data-monitor-error hidden></section><section class="monitor-summary" data-monitor-summary></section><section class="monitor-apps" data-monitor-apps></section></main></body></html>"""
 
 
 def _request_lang(parsed_url) -> str:
