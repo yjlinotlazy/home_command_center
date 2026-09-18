@@ -6,5 +6,5 @@ tags:
   - time
   - local
 tomato_watch:
-  projects_csv: /home/yli/Dropbox/Embedded/home_companian/time/projects.csv
-  history_csv: /home/yli/Dropbox/Embedded/home_companian/time/histroy.csv
+  projects_csv: /path/to/tomato-watch/projects.csv
+  history_csv: /path/to/tomato-watch/history.csv

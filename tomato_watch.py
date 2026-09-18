@@ -12,7 +12,6 @@ from asset_urls import asset_url
 from cli_tools.util import render_tool_page_shell
 
 CONFIG_PATH = Path.home() / ".config" / "home_command_center" / "apps" / "tomato_watch.yaml"
-DEFAULT_DIR = Path.home() / "Dropbox" / "Embedded" / "home_companian" / "time"
 
 
 class TomatoWatchError(Exception):
@@ -21,17 +20,23 @@ class TomatoWatchError(Exception):
 
 def _paths(config_path: Path = CONFIG_PATH) -> tuple[Path, Path]:
     import yaml
-    if not config_path.exists():
-        repo_config = Path(__file__).resolve().parent / "apps" / "tomato_watch.yaml"
-        if repo_config.exists():
-            config_path = repo_config
+    if not config_path.is_file():
+        raise TomatoWatchError(f"tomato_watch 配置不存在: {config_path}")
     try:
         raw = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
     except (OSError, yaml.YAMLError) as exc:
         raise TomatoWatchError("tomato_watch 配置无法读取") from exc
     settings = raw.get("tomato_watch", {}) if isinstance(raw, dict) else {}
-    projects = Path(settings.get("projects_csv", DEFAULT_DIR / "projects.csv")).expanduser()
-    history = Path(settings.get("history_csv", DEFAULT_DIR / "histroy.csv")).expanduser()
+    if not isinstance(settings, dict):
+        raise TomatoWatchError("tomato_watch 配置必须是映射")
+    projects_value = settings.get("projects_csv")
+    history_value = settings.get("history_csv")
+    if not isinstance(projects_value, str) or not projects_value.strip():
+        raise TomatoWatchError("tomato_watch.projects_csv 未配置")
+    if not isinstance(history_value, str) or not history_value.strip():
+        raise TomatoWatchError("tomato_watch.history_csv 未配置")
+    projects = Path(projects_value).expanduser()
+    history = Path(history_value).expanduser()
     return projects, history
 
 
