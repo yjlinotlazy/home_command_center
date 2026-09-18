@@ -95,6 +95,23 @@ health_verify_tls: false
             )
             self.assertEqual(payload["thumbnail"], "/thumb/tool:eat-what")
 
+    def test_server_monitor_is_always_last(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            apps_dir = Path(tmp)
+            (apps_dir / "demo.yaml").write_text(
+                'id: demo\nname: Demo\nurl: "https://example.test"\n',
+                encoding="utf-8",
+            )
+            cover = apps_dir / "monitor.png"
+            cover.write_bytes(b"png")
+
+            registry = AppRegistry(apps_dir)
+            apps = registry.app_payload()["apps"]
+
+            self.assertEqual(apps[-1]["id"], "system-monitor")
+            self.assertEqual(apps[-1]["thumbnail"], "/thumb/system-monitor")
+            self.assertEqual(registry.thumbnail_path("system-monitor"), cover.resolve())
+
 
 if __name__ == "__main__":
     unittest.main()

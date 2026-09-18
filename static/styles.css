@@ -260,10 +260,6 @@ select {
   background: var(--accent-strong);
 }
 
-.card-action {
-  width: 100%;
-}
-
 .back {
   align-self: center;
   border: 1px solid var(--line);
@@ -285,42 +281,72 @@ select {
 .monitor-row { display: grid; grid-template-columns: 1fr auto; gap: 5px 14px; }
 .monitor-row small { display: block; margin-top: 4px; }
 .monitor-row p { grid-column: 1 / -1; margin: 2px 0 0; font-size: .9rem; }
-@media (max-width: 650px) { .topbar { align-items: start; flex-wrap: wrap; } .monitor-row { grid-template-columns: 1fr; } }
+.monitor-tabs { display: flex; gap: 8px; margin: 16px 0; border-bottom: 1px solid var(--line); }
+.monitor-tabs button { border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); padding: 9px 12px; cursor: pointer; font: inherit; }
+.monitor-tabs button.active { border-bottom-color: var(--accent); color: var(--accent-strong); }
+.monitor-stat-controls { margin-bottom: 14px; max-width: 180px; }
+.monitor-stat-controls label { display: grid; gap: 5px; color: var(--muted); }
+.monitor-stat-card { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); padding: 14px; margin-bottom: 14px; }
+.monitor-stat-list { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.monitor-stat-list .monitor-stat-card { margin-bottom: 0; }
+.monitor-stat-card header { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+.monitor-stat-card h2 { margin: 0; }
+.monitor-stat-card header small { color: var(--muted); }
+.monitor-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-top: 14px; }
+.monitor-page .monitor-stat-card .metric { gap: 7px; padding: 14px; }
+.monitor-page .monitor-stat-card .metric span { font-size: 1rem; }
+.monitor-page .monitor-stat-card .metric strong { font-size: 1.8rem; }
+.monitor-page .monitor-stat-card .metric small { font-size: .95rem; }
+.monitor-stat-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 14px; color: var(--muted); }
+.monitor-stat-detail ul { list-style: none; padding: 0; margin: 6px 0 0; }
+.monitor-stat-detail li { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; }
+.monitor-stat-detail code { color: var(--text); }
+@media (max-width: 650px) { .topbar { align-items: start; flex-wrap: wrap; } .monitor-row { grid-template-columns: 1fr; } .monitor-page .monitor-list { grid-template-columns: 1fr; } }
 
 .monitor-page {
-  --bg: #0c1110;
-  --panel: #111a17;
-  --text: #d6e7df;
-  --muted: #789188;
-  --line: #233a32;
-  --accent: #59d18c;
-  --accent-strong: #9af2ba;
-  --ok: #59d18c;
-  --danger: #ff766d;
+  --bg: #f4f7f5;
+  --panel: #ffffff;
+  --text: #1d2923;
+  --muted: #5f6f66;
+  --line: #cbd8d0;
+  --accent: #167a4b;
+  --accent-strong: #0d5c37;
+  --ok: #167a4b;
+  --danger: #b42318;
   background: var(--bg);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 16px;
 }
 
 .monitor-page .shell { padding-top: 24px; }
 .monitor-page .topbar { align-items: center; margin-bottom: 18px; }
 .monitor-page h1 { color: var(--accent-strong); font-size: clamp(1.55rem, 5vw, 2.5rem); letter-spacing: -0.04em; }
 .monitor-page .prompt { color: var(--accent); }
-.monitor-page p { font-size: .82rem; }
-.monitor-page .back { border-color: var(--line); background: transparent; color: var(--muted); font-size: .78rem; padding: 6px 8px; }
-.monitor-page .count { border-color: var(--line); background: transparent; color: var(--accent); font-size: .78rem; }
+.monitor-page p { font-size: 1rem; }
+.monitor-page .back { border-color: var(--line); background: transparent; color: var(--muted); font-size: .95rem; padding: 8px 10px; }
+.monitor-page .count { border-color: var(--line); background: transparent; color: var(--accent); font-size: .95rem; }
 .monitor-page .monitor-summary { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-bottom: 22px; }
 .monitor-page .metric, .monitor-page .monitor-row { border-color: var(--line); border-radius: 3px; background: var(--panel); box-shadow: inset 2px 0 var(--accent); }
 .monitor-page .metric { gap: 5px; padding: 12px; }
 .monitor-page .metric span { color: var(--accent); font-size: .72rem; text-transform: uppercase; }
 .monitor-page .metric strong { color: var(--text); font-size: 1.15rem; }
-.monitor-page .metric small, .monitor-page .monitor-row small, .monitor-page .monitor-row p { font-size: .73rem; }
-.monitor-page .monitor-apps h2 { color: var(--accent); font-size: .85rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; }
-.monitor-page .monitor-list { gap: 6px; }
+.monitor-page .metric small, .monitor-page .monitor-row small, .monitor-page .monitor-row p { font-size: .9rem; }
+.monitor-page .monitor-summary .metric { gap: 7px; padding: 14px; }
+.monitor-page .monitor-summary .metric span { font-size: 1rem; }
+.monitor-page .monitor-summary .metric strong { font-size: 1.8rem; }
+.monitor-page .monitor-summary .metric small { font-size: .95rem; }
+.monitor-page .monitor-tabs button { font-size: 1rem; }
+.monitor-page .monitor-stat-controls label { font-size: 1rem; }
+.monitor-page .monitor-stat-card header small { font-size: .95rem; }
+.monitor-page .monitor-stat-detail { font-size: 1rem; }
+.monitor-page .monitor-apps { font-size: 1.05rem; }
+.monitor-page .monitor-apps h2 { color: var(--accent); font-size: 1.15rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.monitor-page .monitor-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .monitor-page .monitor-row { grid-template-columns: 1fr auto; gap: 3px 12px; padding: 10px 12px; }
-.monitor-page .monitor-row strong { font-size: .88rem; font-weight: 600; }
-.monitor-page .monitor-row .status { border-radius: 2px; padding: 2px 6px; font-size: .7rem; }
+.monitor-page .monitor-row strong { font-size: 1rem; font-weight: 600; }
+.monitor-page .monitor-row .status { border-radius: 2px; padding: 3px 7px; font-size: .9rem; }
 .monitor-page .monitor-row p { margin: 2px 0 0; }
-.monitor-page .notice { border-color: #633b37; border-radius: 3px; background: #241513; color: #ffaaa3; font-size: .8rem; }
+.monitor-page .notice { border-color: #e7b7b2; border-radius: 3px; background: #fff1f0; color: #9f2118; font-size: .95rem; }
 
 .tool-shell {
   width: min(1360px, calc(100% - 24px));
@@ -823,8 +849,7 @@ small {
     font-size: 0.72rem;
   }
 
-  .description,
-  .card-action {
+  .description {
     display: none;
   }
 

@@ -24,6 +24,8 @@ from cli_tools import chinese_practice, daka_checkin, eat_what, quick_pic
 from asset_urls import asset_url
 from i18n import normalize_lang, tr
 import server_monitor
+import app_stats
+from request_logging import CountingWriter, ToolRequestLogger
 
 
 ROOT = Path(__file__).resolve().parent
@@ -61,6 +63,20 @@ class AppConfig:
             return "80"
         return ""
 
+    @property
+    def process_ports(self) -> tuple[int, ...]:
+        ports: list[int] = []
+        for value in (self.health_url, self.url):
+            if not value:
+                continue
+            try:
+                port = urlparse(value).port
+            except ValueError:
+                continue
+            if port is not None and port not in ports:
+                ports.append(port)
+        return tuple(ports)
+
     def thumbnail_path(self) -> Path | None:
         cover = self.source.with_suffix(".png")
         if cover.is_file():
@@ -83,6 +99,7 @@ class AppConfig:
             "name": self.name,
             "url": self.url,
             "hostname": self.hostname,
+            "process_ports": list(self.process_ports),
             "thumbnail": f"/thumb/{self.id}" if self.thumbnail_path() else None,
             "description": self.description,
             "tags": list(self.tags),
@@ -181,22 +198,28 @@ class AppRegistry:
             {tag for app in apps for tag in app.tags} | {tag for tool in command_tools for tag in tool.tags},
             key=str.lower,
         )
+        app_payloads = [app.to_dict(statuses[app.id]) for app in apps] + tool_payloads
+        app_payloads.append(
+            {
+                "id": "system-monitor",
+                "name": tr(lang, "server_monitor"),
+                "url": "/monitor",
+                "hostname": "",
+                "thumbnail": (
+                    "/thumb/system-monitor"
+                    if self.thumbnail_path("system-monitor")
+                    else None
+                ),
+                "description": tr(lang, "monitor_subtitle"),
+                "tags": ["system"],
+                "health_url": None,
+                "health_verify_tls": True,
+                "status": "online",
+                "kind": "monitor",
+            }
+        )
         return {
-            "apps": [app.to_dict(statuses[app.id]) for app in apps] + tool_payloads + [
-                {
-                    "id": "system-monitor",
-                    "name": tr(lang, "server_monitor"),
-                    "url": "/monitor",
-                    "hostname": "",
-                    "thumbnail": None,
-                    "description": tr(lang, "monitor_subtitle"),
-                    "tags": ["system"],
-                    "health_url": None,
-                    "health_verify_tls": True,
-                    "status": "online",
-                    "kind": "monitor",
-                }
-            ],
+            "apps": app_payloads,
             "tags": all_tags,
         }
 
@@ -225,6 +248,10 @@ class AppRegistry:
         return status
 
     def thumbnail_path(self, app_id: str) -> Path | None:
+        if app_id == "system-monitor":
+            cover = self.apps_dir / "monitor.png"
+            return cover.resolve() if cover.is_file() else None
+
         if app_id.startswith("tool:"):
             try:
                 tool = get_command_tool(app_id.removeprefix("tool:"))
@@ -251,6 +278,33 @@ TOOL_PAGE_RENDERERS = {
 
 class Handler(BaseHTTPRequestHandler):
     server_version = "HomeCommandCenter/0.1"
+    request_logger = ToolRequestLogger(ROOT)
+
+    def handle_one_request(self) -> None:
+        started_at = time.time()
+        self._telemetry_status = 500
+        original_wfile = self.wfile
+        counted_wfile = CountingWriter(original_wfile)
+        self.wfile = counted_wfile
+        try:
+            super().handle_one_request()
+        finally:
+            self.wfile = original_wfile
+            try:
+                self.request_logger.record(
+                    target=getattr(self, "path", ""),
+                    method=getattr(self, "command", "UNKNOWN"),
+                    status=getattr(self, "_telemetry_status", 500),
+                    request_size=int(self.headers.get("Content-Length", "0") or 0),
+                    response_size=counted_wfile.bytes_written,
+                    started_at=started_at,
+                )
+            except Exception:
+                pass
+
+    def send_response(self, code: int, message: str | None = None) -> None:
+        self._telemetry_status = int(code)
+        super().send_response(code, message)
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
@@ -296,6 +350,22 @@ class Handler(BaseHTTPRequestHandler):
                 self._send_json(server_monitor.collect(apps, tools))
             except ConfigError as exc:
                 self._send_json({"error": str(exc)}, status=500)
+            return
+
+        if path == "/api/stats":
+            app_id = parse_qs(parsed.query).get("app_id", [""])[0]
+            if not app_id or app_id == "system-monitor":
+                self._send_json({"error": "app_id is required"}, status=400)
+                return
+            try:
+                known_ids = {app["id"] for app in REGISTRY.app_payload(lang)["apps"]}
+                if app_id not in known_ids:
+                    self._send_json({"error": "Unknown app"}, status=404)
+                    return
+                days = int(parse_qs(parsed.query).get("days", ["30"])[0])
+                self._send_json(app_stats.stats_for_app(app_id, days))
+            except (ConfigError, ValueError) as exc:
+                self._send_json({"error": str(exc)}, status=400)
             return
 
         if path == "/api/tools/quick_pic/candidates":
@@ -572,7 +642,9 @@ def render_monitor(lang: str = "zh") -> str:
 <script>window.__HCC_LANG__ = {json.dumps(resolved_lang)};</script>
 <script src="{asset_url('/static/i18n.js')}" defer></script><script src="{asset_url('/static/monitor.js')}" defer></script></head>
 <body class="monitor-page"><main class="shell monitor-shell"><header class="topbar"><div><a class="back" href="/">{html.escape(tr(resolved_lang, 'back_to_dashboard'))}</a><h1><span class="prompt">$</span> {html.escape(title)}</h1><p>{html.escape(tr(resolved_lang, 'monitor_subtitle'))}</p></div><div class="count" data-monitor-updated>—</div></header>
-<section class="notice" data-monitor-error hidden></section><section class="monitor-summary" data-monitor-summary></section><section class="monitor-apps" data-monitor-apps></section></main></body></html>"""
+<nav class="monitor-tabs" data-monitor-tabs><button type="button" data-monitor-tab="overview">{html.escape(tr(resolved_lang, 'monitor_overview'))}</button><button type="button" data-monitor-tab="stats">{html.escape(tr(resolved_lang, 'monitor_stats'))}</button></nav>
+<section data-monitor-panel="overview"><section class="notice" data-monitor-error hidden></section><section class="monitor-summary" data-monitor-summary></section><section class="monitor-apps" data-monitor-apps></section></section>
+<section data-monitor-panel="stats" hidden><section class="notice" data-stats-error hidden></section><div class="monitor-stat-controls"><label>{html.escape(tr(resolved_lang, 'monitor_range'))}<select data-stats-range><option value="7">7d</option><option value="30" selected>30d</option><option value="90">90d</option><option value="3650">{html.escape(tr(resolved_lang, 'monitor_all'))}</option></select></label></div><section class="monitor-stat-list" data-stats-list></section></section></main></body></html>"""
 
 
 def _request_lang(parsed_url) -> str:

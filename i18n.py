@@ -91,7 +91,6 @@ TEXT: dict[str, dict[str, str]] = {
         "monitor_apps": "应用进程",
         "monitor_embedded": "内置运行",
         "monitor_builtin": "内置工具",
-        "monitor_no_process": "未找到监听进程",
         "monitor_load_error": "无法加载服务器状态",
     },
     "en": {
@@ -179,7 +178,6 @@ TEXT: dict[str, dict[str, str]] = {
         "monitor_apps": "App processes",
         "monitor_embedded": "Embedded",
         "monitor_builtin": "Built-in tool",
-        "monitor_no_process": "No listening process found",
         "monitor_load_error": "Unable to load server status",
     },
 }

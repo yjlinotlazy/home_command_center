@@ -68,7 +68,6 @@ function renderApp(app) {
   const media = app.thumbnail
     ? `<div class="thumb-frame"><img class="thumb" src="${escapeHtml(app.thumbnail)}" alt=""></div>`
     : `<div class="fallback" aria-hidden="true">${escapeHtml(initials(app.name))}</div>`;
-  const actionLabel = app.kind === "command" ? t("use") : t("open");
 
   return `<a class="card" data-card href="${escapeHtml(app.url)}">
     ${media}
@@ -82,7 +81,6 @@ function renderApp(app) {
       </div>
       <div class="description">${escapeHtml(app.description || t("no_description"))}</div>
       <!-- Keyword pills are disabled for the current version. -->
-      <span class="open card-action">${actionLabel}</span>
     </div>
   </a>`;
 }
