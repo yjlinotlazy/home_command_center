@@ -1,6 +1,6 @@
 id: files
 name: Files
-url: "https://192.168.4.35:8002"
+url: "https://<ip>:8002"
 description: Household file browser.
 tags:
   - storage

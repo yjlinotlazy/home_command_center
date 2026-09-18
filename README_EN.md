@@ -65,7 +65,7 @@ Create one YAML file per app in `~/.config/home_command_center/apps/`.
 ```yaml
 id: inspire
 name: Inspire
-url: "https://192.168.0.0:8001"
+url: "https://<ip>:8001"
 description: Inspiration browser
 tags:
   - writing
@@ -154,7 +154,7 @@ Example:
 
 ```bash
 mkcert -install
-mkcert 192.168.0.0
+mkcert <ip>
 ```
 
 Example Caddyfile:
@@ -164,15 +164,15 @@ Example Caddyfile:
     auto_https off
 }
 
-https://192.168.0.0:8000 {
+https://<ip>:8000 {
     bind 0.0.0.0
-    tls /path/to/192.168.0.0.pem /path/to/192.168.0.0-key.pem
+    tls /path/to/<ip>.pem /path/to/<ip>-key.pem
     reverse_proxy 127.0.0.1:7000
 }
 
-https://192.168.0.0:8001 {
+https://<ip>:8001 {
     bind 0.0.0.0
-    tls /path/to/192.168.0.0.pem /path/to/192.168.0.0-key.pem
+    tls /path/to/<ip>.pem /path/to/<ip>-key.pem
     reverse_proxy 127.0.0.1:7001
 }
 ```

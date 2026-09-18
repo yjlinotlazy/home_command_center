@@ -56,7 +56,7 @@ python3 server.py --apps-dir ./apps
 ```yaml
 id: inspire
 name: Inspire
-url: "https://192.168.0.0:8001"
+url: "https://<ip>:8001"
 description: Inspiration browser
 tags:
   - writing
@@ -144,7 +144,7 @@ quick_pic:
 
 ```bash
 mkcert -install
-mkcert 192.168.0.0
+mkcert <ip>
 ```
 
 示例 Caddyfile：
@@ -154,15 +154,15 @@ mkcert 192.168.0.0
     auto_https off
 }
 
-https://192.168.0.0:8000 {
+https://<ip>:8000 {
     bind 0.0.0.0
-    tls /path/to/192.168.0.0.pem /path/to/192.168.0.0-key.pem
+    tls /path/to/<ip>.pem /path/to/<ip>-key.pem
     reverse_proxy 127.0.0.1:7000
 }
 
-https://192.168.0.0:8001 {
+https://<ip>:8001 {
     bind 0.0.0.0
-    tls /path/to/192.168.0.0.pem /path/to/192.168.0.0-key.pem
+    tls /path/to/<ip>.pem /path/to/<ip>-key.pem
     reverse_proxy 127.0.0.1:7001
 }
 ```
@@ -254,7 +254,7 @@ wg genkey | tee <device>.private | wg pubkey > <device>.public
 为设备分配一个未使用的 VPN 地址，例如：
 
 ```text
-10.100.0.3/32
+<ip>/32
 ```
 
 ---

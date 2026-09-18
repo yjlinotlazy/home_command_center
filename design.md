@@ -21,7 +21,7 @@ The repo uses two port ranges:
 Example:
 
 ```text
-public URL:   https://192.168.0.0:8001
+public URL:   https://<ip>:8001
 local backend: http://127.0.0.1:7001
 ```
 

@@ -75,7 +75,7 @@ Example:
 ```yaml
 id: inspire
 name: Inspire
-url: "https://192.168.0.0:8001"
+url: "https://<ip>:8001"
 description: Inspiration browser
 tags:
   - writing
@@ -89,7 +89,7 @@ health_verify_tls: false
 ```yaml
 id: inspire
 name: Inspire
-url: "https://192.168.0.0:8001"
+url: "https://<ip>:8001"
 ```
 
 ### Optional Fields
@@ -217,9 +217,9 @@ The dashboard should provide an Open button for every configured app.
 For MVP, apps are expected to use their own HTTPS ports:
 
 ```text
-https://192.168.0.0:8000   # 家用命令台
-https://192.168.0.0:8001   # App 1
-https://192.168.0.0:8002   # App 2
+https://<ip>:8000   # 家用命令台
+https://<ip>:8001   # App 1
+https://<ip>:8002   # App 2
 ```
 
 This is simpler and more reliable than path-based routing.
@@ -241,14 +241,14 @@ Example:
 
 ```bash
 mkcert -install
-mkcert 192.168.0.0
+mkcert <ip>
 ```
 
 This generates:
 
 ```text
-192.168.0.0.pem
-192.168.0.0-key.pem
+<ip>.pem
+<ip>-key.pem
 ```
 
 Example Caddyfile:
@@ -258,21 +258,21 @@ Example Caddyfile:
     auto_https off
 }
 
-https://192.168.0.0:8000 {
+https://<ip>:8000 {
     bind 0.0.0.0
-    tls /path/to/192.168.0.0.pem /path/to/192.168.0.0-key.pem
+    tls /path/to/<ip>.pem /path/to/<ip>-key.pem
     reverse_proxy 127.0.0.1:7000
 }
 
-https://192.168.0.0:8001 {
+https://<ip>:8001 {
     bind 0.0.0.0
-    tls /path/to/192.168.0.0.pem /path/to/192.168.0.0-key.pem
+    tls /path/to/<ip>.pem /path/to/<ip>-key.pem
     reverse_proxy 127.0.0.1:7001
 }
 
-https://192.168.0.0:8002 {
+https://<ip>:8002 {
     bind 0.0.0.0
-    tls /path/to/192.168.0.0.pem /path/to/192.168.0.0-key.pem
+    tls /path/to/<ip>.pem /path/to/<ip>-key.pem
     reverse_proxy 127.0.0.1:7002
 }
 ```
